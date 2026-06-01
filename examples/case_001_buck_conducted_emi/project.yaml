@@ -1,0 +1,17 @@
+project_id: "case_001_buck_conducted_emi"
+name: "Buck conducted EMI starter case"
+version: "0.1.0"
+created_at: "2026-05-13"
+analysis_scope: "conducted_emi_dc_dc"
+inputs:
+  netlist_path: "input/buck_demo.cir"
+  schematic_path: ""
+  models_dir: "input/models"
+privacy:
+  allow_cloud_llm: false
+  allow_telemetry: false
+  redact_net_names: true
+ltspice:
+  executable_path: ""
+  mode: "dry-run"
+  timeout_seconds: 120

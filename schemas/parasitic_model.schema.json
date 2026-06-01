@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/parasitic_model.schema.json",
+  "title": "PCB Parasitic Model",
+  "type": "object",
+  "required": [
+    "id",
+    "structure",
+    "parasitic_type",
+    "value",
+    "unit",
+    "confidence",
+    "assumptions"
+  ],
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "structure": {
+      "type": "string",
+      "enum": [
+        "trace",
+        "via",
+        "plane_pair",
+        "polygon",
+        "cable",
+        "capacitor_mount",
+        "loop",
+        "coupling"
+      ]
+    },
+    "parasitic_type": {
+      "type": "string",
+      "enum": [
+        "R",
+        "L",
+        "C",
+        "G",
+        "K",
+        "RLC",
+        "transmission_line",
+        "frequency"
+      ]
+    },
+    "value": {
+      "type": "number"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "min_value": {
+      "type": "number"
+    },
+    "max_value": {
+      "type": "number"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ]
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "formula": {
+      "type": "string"
+    },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ltspice_representation": {
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/simulation_run.schema.json",
+  "title": "Simulation Run",
+  "type": "object",
+  "required": [
+    "run_id",
+    "project_id",
+    "status",
+    "started_at",
+    "artifacts"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "planned",
+        "dry_run",
+        "running",
+        "completed",
+        "failed",
+        "timeout"
+      ]
+    },
+    "started_at": {
+      "type": "string"
+    },
+    "completed_at": {
+      "type": "string"
+    },
+    "command": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "properties": {
+        "netlist": {
+          "type": "string"
+        },
+        "log": {
+          "type": "string"
+        },
+        "raw": {
+          "type": "string"
+        },
+        "report": {
+          "type": "string"
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

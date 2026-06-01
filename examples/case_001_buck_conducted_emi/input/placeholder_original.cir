@@ -1,0 +1,10 @@
+* Placeholder DC/DC input network for MVP testing
+* Replace with user-supplied LTspice netlist later.
+Vin in 0 DC 24
+Rload out 0 12
+Cin in 0 10u Rser=20m
+Ltrace in sw_in 10n
+* Simplified switching disturbance source placeholder
+Inoise sw_in 0 PULSE(0 0.2 0 5n 5n 100n 2.5u)
+.tran 0 5m 0 100n
+.end

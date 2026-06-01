@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/recommendation.schema.json",
+  "title": "EMC Recommendation",
+  "type": "object",
+  "required": [
+    "id",
+    "area",
+    "severity",
+    "confidence",
+    "problem",
+    "evidence",
+    "proposed_change",
+    "limitations"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^REC-[0-9]{3,}$"
+    },
+    "area": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string",
+      "enum": [
+        "info",
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "problem": {
+      "type": "string"
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "proposed_change": {
+      "type": "object",
+      "required": [
+        "type",
+        "description"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "component": {
+          "type": "string"
+        },
+        "values": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "spice_fragment": {
+          "type": "string"
+        }
+      }
+    },
+    "simulation_required": {
+      "type": "boolean",
+      "default": true
+    },
+    "user_action": {
+      "type": "string"
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "llm_generated": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when the recommendation text was produced by an LLM (M2.7+). False for deterministic rule-based recommendations."
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Optional knowledge-pack snippet IDs or Source_IDs that the LLM cited (M2.7+). Distinct from `sources` which is the Rule_ID list."
+    }
+  }
+}

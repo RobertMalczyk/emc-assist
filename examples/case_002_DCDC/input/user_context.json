@@ -1,0 +1,71 @@
+{
+  "project_type": "Hot-swap controller (Analog Devices ADM1281-3) with three parallel PSMN0R925YLC power FETs",
+  "problem_hypothesis": "product works ok from user perspective but fails conducted emission test",
+  "input_voltage_v": 12,
+  "load_current_a": 0.012,
+  "switching_frequency_hz": null,
+  "cable_length_m": 1,
+  "pcb": {
+    "layers": 2,
+    "copper_oz": 1,
+    "dielectric_height_to_plane_mm": 1.6,
+    "trace_length_mm": 25,
+    "trace_width_mm": 1,
+    "prepreg_mm": 0.1
+  },
+  "testbench_wiring": {
+    "external_supply_v": 12,
+    "dut_supply_net": "VIN",
+    "dut_return_net": "0",
+    "user_source_to_strip": "V4",
+    "lisn_mode": "dual"
+  },
+  "simulation": {
+    "tran_directive": ".tran 0 2m 0 50n"
+  },
+  "notes": "ADM1281-3 hot-swap controller. Three parallel power MOSFETs (M1/M2/M3 = PSMN0R925YLC). Sense resistors R2 + R3 = 0.5 mOhm each. PCB is 2-layer (FR-4 1.6mm typical). 1 m input cable. LISN-based pre-compliance setup. NOT a DC/DC switching converter — there is no PWM; conducted EMI risk comes from the FET turn-on slew rate. The testbench feeds a DC 12 V rail through the LISN + cable, so the controller's power-up inrush occurs near t=0 (V(MEAS) activity peaks around 0.08 ms); the run uses a fine 5 ns timestep over a 1 ms window (`.tran 0 1m 0 5n`, ~100 MHz Nyquist) so the 150 kHz – 30 MHz CISPR band B resolves for the conducted-EMI detector analysis.",
+  "signals": [
+    {
+      "name": "Vin",
+      "kind": "voltage",
+      "expr": "V(VIN)",
+      "source": "user",
+      "unit": "V",
+      "confidence": 1.0,
+      "rationale": "LTspice .asc FLAG label `VIN`",
+      "from_label": "VIN"
+    },
+    {
+      "name": "Vout",
+      "kind": "voltage",
+      "expr": "V(VOUT)",
+      "source": "user",
+      "unit": "V",
+      "confidence": 1.0,
+      "rationale": "LTspice .asc FLAG label `VOUT`",
+      "from_label": "VOUT"
+    }
+  ],
+  "parasitics": {
+    "per_net": {
+      "0": {
+        "skip": true
+      },
+      "N013": {
+        "l_nh": 30
+      },
+      "N017": {
+        "r_mohm": 30
+      },
+      "NC_01": {
+        "skip": true
+      },
+      "NC_02": {
+        "skip": true
+      },
+      "NC_03": {
+        "skip": true
+      }
+    }
+  }
+}

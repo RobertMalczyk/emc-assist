@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "emc-assistant"
+version = "0.1.0"
+description = "Local EMC/LTspice Assistant for conducted EMI analysis (MVP)"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
+authors = [
+  { name = "Robert Malczyk and EMC/LTspice Assistant contributors" }
+]
+dependencies = [
+  "PyYAML>=6.0",
+  "jsonschema>=4.21",
+  "openai>=1.0",
+  "numpy>=1.26",
+]
+
+[project.urls]
+Homepage = "https://openemc.dev/emc-assist"
+Documentation = "https://github.com/RobertMalczyk/emc-assist/tree/main/docs"
+Repository = "https://github.com/RobertMalczyk/emc-assist"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.4",
+]
+embeddings = [
+  "sentence-transformers>=2.5",
+]
+pdf = [
+  "pdfminer.six>=20231228",   # parse PDFs (knowledge-base ingestion)
+  "xhtml2pdf>=0.2.16",        # render PDFs (report export)
+]
+ui = [
+  "pywebview>=5.0",
+]
+
+[project.scripts]
+emc-assistant = "emc_assistant.cli:main"
+emc-assistant-ui = "emc_assistant.ui.app:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+emc_assistant = ["ui/index.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+markers = [
+    "live_llm: makes a real (paid) OpenAI call; auto-skipped without a resolvable API key or when EMC_ASSISTANT_SKIP_LIVE_LLM is set",
+]

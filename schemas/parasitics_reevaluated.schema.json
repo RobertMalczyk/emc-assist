@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/parasitics_reevaluated.schema.json",
+  "title": "Parasitics Re-evaluation Audit (M2.17)",
+  "description": "Audit of an LLM/RAG per-net parasitic value re-evaluation. One object per run, written to generated/parasitics_reevaluated.json. For every non-ground net it records the deterministic prior bands and, when the LLM proposed one, the refined min/typ/max bands with confidence, rationale and citations, plus the typ-value delta. Only typ values are ever applied as user overrides; the bands and citations live here.",
+  "type": "object",
+  "required": ["run_id", "nets"],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Run identifier; matches the privacy log results/llm/<run_id>.jsonl."
+    },
+    "nets": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/net_entry" }
+    }
+  },
+  "$defs": {
+    "band": {
+      "type": "array",
+      "items": { "type": "number" },
+      "minItems": 3,
+      "maxItems": 3,
+      "description": "[min, typ, max], ascending."
+    },
+    "bands": {
+      "type": "object",
+      "required": ["r_band", "l_band", "c_band"],
+      "properties": {
+        "r_band": { "$ref": "#/$defs/band" },
+        "l_band": { "$ref": "#/$defs/band" },
+        "c_band": { "$ref": "#/$defs/band" }
+      }
+    },
+    "net_entry": {
+      "type": "object",
+      "required": ["net", "role", "value_source", "prior", "refined"],
+      "properties": {
+        "net": { "type": "string", "minLength": 1 },
+        "role": { "type": "string" },
+        "value_source": {
+          "type": "string",
+          "enum": ["rule_of_thumb", "llm_rag", "engineering_estimate"],
+          "description": "Provenance: rule_of_thumb = deterministic calculator prior kept; llm_rag = LLM-refined with a cited source; engineering_estimate = LLM-proposed with no citation."
+        },
+        "prior": { "$ref": "#/$defs/bands" },
+        "refined": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "required": ["r_band", "l_band", "c_band", "confidence", "rationale", "cited_sources"],
+              "properties": {
+                "r_band": { "$ref": "#/$defs/band" },
+                "l_band": { "$ref": "#/$defs/band" },
+                "c_band": { "$ref": "#/$defs/band" },
+                "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+                "rationale": { "type": "string" },
+                "cited_sources": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          ],
+          "description": "Refined bands, or null when the net kept its deterministic prior (LLM error / omission / unusable band)."
+        },
+        "typ_delta_pct": {
+          "type": "object",
+          "description": "Percent change of the refined typ vs the prior typ (present only when refined != null).",
+          "properties": {
+            "r": { "type": ["number", "null"] },
+            "l": { "type": ["number", "null"] },
+            "c": { "type": ["number", "null"] }
+          }
+        }
+      }
+    }
+  }
+}

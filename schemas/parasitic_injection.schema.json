@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/parasitic_injection.schema.json",
+  "title": "Parasitic Injection Plan Entry",
+  "description": "One agent-proposed splice of a parasitic subcircuit into the composer-generated testbench.cir. The composer reads a list of these entries and emits X-instances between the LISN/cable and the user fragment. The user's .cir is never mutated.",
+  "type": "object",
+  "required": [
+    "instance_name",
+    "subckt_name",
+    "nets",
+    "rationale"
+  ],
+  "properties": {
+    "instance_name": {
+      "type": "string",
+      "pattern": "^X_[A-Za-z0-9_]+$",
+      "description": "SPICE instance refdes, must start with 'X_' (e.g. 'X_TRACE_VIN', 'X_VIA_RTN')."
+    },
+    "subckt_name": {
+      "type": "string",
+      "enum": ["TRACE_RLC", "VIA_L", "CAP_ESR_ESL"],
+      "description": "Which composer-generated subcircuit to instantiate. Only these three are supported in M2.10. The composer rejects unknown names."
+    },
+    "nets": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 2,
+      "maxItems": 4,
+      "description": "Ordered list of nets to wire to the subckt's ports. TRACE_RLC has 3 ports (IN OUT 0), VIA_L has 2 (IN OUT), CAP_ESR_ESL has 2 (IN OUT). The composer validates port count against subckt_name."
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable engineering reason for the splice. E.g. 'series trace inductance between cable output and DUT input cap dominates the EMI loop'."
+    },
+    "rule_id": {
+      "type": "string",
+      "description": "Optional Rule_ID from the knowledge base that supports this splice. 'engineering_estimate' when no rule applies."
+    },
+    "parasitic_id": {
+      "type": "string",
+      "description": "Optional reference to the ParasiticEstimate id this injection uses (e.g. 'par-trace-L-iso-25x1'). Helps the composer pick the right .param prefix."
+    },
+    "corner": {
+      "type": "string",
+      "enum": ["min", "typ", "max"],
+      "default": "typ",
+      "description": "Which corner of the parasitic band the X-instance should default to. The composer's .step sweep still walks all three corners; this field affects only the rendered X-instance's parameters when sweep is disabled."
+    },
+    "agent": {
+      "type": "string",
+      "description": "Optional agent name that proposed this injection. Defaults to 'parasitics' in M2.10."
+    }
+  }
+}

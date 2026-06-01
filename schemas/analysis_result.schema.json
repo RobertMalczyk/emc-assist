@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/analysis_result.schema.json",
+  "title": "Analysis Result",
+  "type": "object",
+  "required": [
+    "analysis_id",
+    "project_id",
+    "scope",
+    "assumptions",
+    "recommendations",
+    "limitations"
+  ],
+  "properties": {
+    "analysis_id": {
+      "type": "string"
+    },
+    "project_id": {
+      "type": "string"
+    },
+    "scope": {
+      "type": "string"
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "parasitic_models": {
+      "type": "array",
+      "items": {
+        "$ref": "parasitic_model.schema.json"
+      }
+    },
+    "simulation_runs": {
+      "type": "array",
+      "items": {
+        "$ref": "simulation_run.schema.json"
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "$ref": "recommendation.schema.json"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "used_sources": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

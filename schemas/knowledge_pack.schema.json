@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/knowledge_pack.schema.json",
+  "title": "Knowledge Pack",
+  "description": "Bounded subset of the knowledge base built for a single analysis. Consumed by M2.9 specialist agents and M2.11 orchestrator; written by M2.8 `knowledge build-pack`. Per the copyright contract, source bodies never appear here — only rule_id + source_id + our own summary + (optional) short verbatim excerpt.",
+  "type": "object",
+  "required": [
+    "knowledge_pack_id",
+    "created_at",
+    "retrieval_mode",
+    "problem_context_ref",
+    "snippets",
+    "limitations"
+  ],
+  "properties": {
+    "knowledge_pack_id": {
+      "type": "string",
+      "description": "Stable identifier — usually `<project_id>__<short hash of problem_context>`."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "retrieval_mode": {
+      "type": "string",
+      "enum": ["keyword", "embeddings", "hybrid"],
+      "description": "How retrieval was performed: M2.7 keyword-only, M2.8 embeddings, future hybrid."
+    },
+    "embedder_model": {
+      "type": "string",
+      "description": "Model name when `retrieval_mode != 'keyword'`. e.g. `sentence-transformers/all-MiniLM-L6-v2`."
+    },
+    "problem_context_ref": {
+      "type": "object",
+      "description": "Compact echo of the ProblemContext that produced this pack (project_id + analysis_scope + topology hash).",
+      "required": ["project_id", "analysis_scope"],
+      "properties": {
+        "project_id": { "type": "string" },
+        "analysis_scope": { "type": "string" },
+        "topology": { "type": "string" },
+        "context_hash": { "type": "string" }
+      }
+    },
+    "topics": {
+      "type": "array",
+      "description": "Topic tags inferred from problem_context — drives downstream agent dispatch.",
+      "items": { "type": "string" }
+    },
+    "snippets": {
+      "type": "array",
+      "description": "Redacted retrieved snippets safe to send to an LLM.",
+      "items": {
+        "type": "object",
+        "required": ["rule_id", "source_id", "summary"],
+        "properties": {
+          "rule_id": { "type": "string" },
+          "source_id": { "type": "string" },
+          "score": { "type": "number" },
+          "summary": {
+            "type": "string",
+            "description": "Our own concise summary of the rule. Always safe to send."
+          },
+          "excerpt": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Optional ≤200-char verbatim excerpt; present only when source.allowed_use permits."
+          },
+          "tier": {
+            "type": "string",
+            "enum": ["seed", "raw_sources", "user_private_sources", "licensed_sources"]
+          }
+        }
+      }
+    },
+    "recommended_sweeps": {
+      "type": "array",
+      "description": "Variant-engine hints derived from the retrieved rules (consumed by M2.9 / M2.10).",
+      "items": {
+        "type": "object",
+        "required": ["parameter", "range"],
+        "properties": {
+          "parameter": { "type": "string" },
+          "range": { "type": "string" },
+          "rationale": { "type": "string" },
+          "source_rule_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "typical_values": {
+      "type": "array",
+      "description": "Pre-extracted rule-of-thumb values from the snippets.",
+      "items": {
+        "type": "object",
+        "required": ["parameter", "value"],
+        "properties": {
+          "parameter": { "type": "string" },
+          "value": { "type": "string" },
+          "confidence": { "type": "string" },
+          "source_rule_ids": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "description": "Caveats carried forward into the report.",
+      "items": { "type": "string" }
+    }
+  }
+}

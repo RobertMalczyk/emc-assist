@@ -1,0 +1,29 @@
+EMC/LTspice Assistant
+Copyright 2026 Robert Malczyk and EMC/LTspice Assistant contributors
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+This project is open so it can grow. If you use the concepts, code, diagrams,
+or terminology from it, please credit Robert Malczyk and link back to the
+original repository at https://github.com/RobertMalczyk/emc-assist.
+
+------------------------------------------------------------------------
+Third-party components
+------------------------------------------------------------------------
+
+This repository vendors the following third-party component, distributed
+under its own license:
+
+  - .claude/skills/codebase-analysis
+    A Claude Code skill used to generate the docs/analysis/ suite.
+    Licensed under the MIT License (see that directory's LICENSE file).
+
+------------------------------------------------------------------------
+Disclaimer
+------------------------------------------------------------------------
+
+This tool performs EMC PRE-COMPLIANCE analysis only. It does not certify
+compliance with any standard. Every recommendation is an engineering
+hypothesis that requires verification by simulation and/or measurement.
+The tool does not bundle, host, or modify LTspice, and does not
+redistribute any vendor or standards-body document content.

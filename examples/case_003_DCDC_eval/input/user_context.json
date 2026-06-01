@@ -1,0 +1,97 @@
+{
+  "testbench_wiring": {
+    "dut_supply_net": "VIN",
+    "dut_return_net": "0",
+    "lisn_mode": "dual"
+  },
+  "signals": [
+    {
+      "name": "Vout",
+      "kind": "voltage",
+      "expr": "V(OUT)",
+      "source": "user",
+      "unit": "V",
+      "confidence": 1.0,
+      "rationale": "LTspice .asc FLAG label `OUT`",
+      "from_label": "OUT"
+    },
+    {
+      "name": "Vin",
+      "kind": "voltage",
+      "expr": "V(IN)",
+      "source": "user",
+      "unit": "V",
+      "confidence": 1.0,
+      "rationale": "LTspice .asc FLAG label `IN`",
+      "from_label": "IN"
+    }
+  ],
+  "pcb": {
+    "layers": 4,
+    "copper_oz": 1,
+    "dielectric_height_to_plane_mm": 1.6,
+    "prepreg_mm": 0.1,
+    "trace_width_mm": 0.5,
+    "trace_length_mm": 25
+  },
+  "parasitics": {
+    "per_net": {
+      "MP_01": {
+        "skip": true
+      },
+      "MP_02": {
+        "skip": true
+      },
+      "MP_04": {
+        "skip": true
+      },
+      "MP_05": {
+        "skip": true
+      },
+      "MP_06": {
+        "skip": true
+      },
+      "MP_07": {
+        "skip": true
+      },
+      "MP_08": {
+        "skip": true
+      },
+      "MP_09": {
+        "skip": true
+      },
+      "MP_10": {
+        "skip": true
+      },
+      "MP_11": {
+        "skip": true
+      },
+      "MP_12": {
+        "skip": true
+      },
+      "MP_13": {
+        "skip": true
+      },
+      "MP_14": {
+        "skip": true
+      },
+      "NC_03": {
+        "skip": true
+      },
+      "NC_15": {
+        "skip": true
+      },
+      "NC_16": {
+        "skip": true
+      },
+      "NC_17": {
+        "skip": true
+      }
+    }
+  },
+  "simulation": {
+    "stop_time": "500u",
+    "max_timestep": "100n",
+    "startup": true
+  }
+}

@@ -1,0 +1,26 @@
+* Buck converter conducted-EMI demo (24 V -> 5 V, ~5 A, 400 kHz)
+* Fragment netlist for emc-assistant composer.
+* No .tran / .end here — the composer owns simulation control.
+* Source models are behavioral; not vendor-specific.
+
+* --- Input source + bulk decoupling ---
+Vin in 0 DC 24
+Lbulk in n_bulk 200n Rser=2m
+Cbulk n_bulk 0 47u Rser=15m
+
+* --- Input EMI filter (DM only; CM is out of MVP scope) ---
+Ldm n_bulk n_in 1u Rser=8m
+Cin n_in 0 4.7u Rser=12m
+
+* --- Switching stage (behavioral) ---
+* 400 kHz, ~50% duty PWM control source
+Vsw sw_ctrl 0 PULSE(0 1 0 10n 10n 1.25u 2.5u)
+.model SWMOD SW(Ron=18m Roff=10Meg Vt=0.5 Vh=0.05)
+S1 n_in n_lx sw_ctrl 0 SWMOD
+.model DFLY D(Ron=20m Roff=10Meg Vfwd=0.4)
+D1 0 n_lx DFLY
+
+* --- Output filter + load ---
+L1 n_lx out 22u Rser=18m
+Cout out 0 22u Rser=20m
+Rload out 0 1.0

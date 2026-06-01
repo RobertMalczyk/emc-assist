@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/signal_map.schema.json",
+  "title": "User Signal Map Entry",
+  "description": "One user-meaningful signal tracked across pipeline transformations. The feature-keeper (M2.10.1) auto-detects candidates from the user's .asc / .cir, asks for confirmation, and persists the resolved map back into user_context.json so downstream stages (composer .meas, report, ranking) speak the user's vocabulary.",
+  "type": "object",
+  "required": [
+    "name",
+    "kind",
+    "expr",
+    "source"
+  ],
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^[A-Za-z_][A-Za-z0-9_]*$",
+      "description": "User-facing name. Used as the prefix for .meas directives (e.g. 'Vout' -> Vout_peak, Vout_rms). Must be a valid SPICE identifier."
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["voltage", "current", "power", "temperature"],
+      "description": "Signal kind. 'temperature' is reserved for future thermal extensions; the MVP only emits .meas for voltage/current/power."
+    },
+    "expr": {
+      "type": "string",
+      "minLength": 1,
+      "description": "SPICE probe expression. Voltage: 'V(net)' or 'V(p,n)'. Current: 'I(refdes)' (e.g. 'I(L1)'). Power: 'V(net)*I(refdes)' or vendor-specific."
+    },
+    "unit": {
+      "type": "string",
+      "description": "Display unit. Defaults: V for voltage, A for current, W for power, degC for temperature."
+    },
+    "target_band": {
+      "type": "object",
+      "description": "Optional expected operating band. The report flags out-of-band observed values.",
+      "properties": {
+        "min": {"type": "number"},
+        "typ": {"type": "number"},
+        "max": {"type": "number"}
+      }
+    },
+    "source": {
+      "type": "string",
+      "enum": ["auto", "user", "llm"],
+      "description": "Where this entry came from: 'auto' = deterministic deduction, 'user' = declared in user_context, 'llm' = refined by signal_map_agent."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confidence of the auto-detect / LLM refinement. 1.0 when source='user' (the user declared it explicitly)."
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Why this name/expr was chosen. Surfaces in the report's Tracked signals section."
+    },
+    "from_label": {
+      "type": "string",
+      "description": "Original schematic label (from .asc FLAG/IOPIN) when the deduction came from there. Empty when the deduction came purely from .cir net names."
+    }
+  }
+}

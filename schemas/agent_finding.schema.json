@@ -1,0 +1,135 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/agent_finding.schema.json",
+  "title": "Per-Agent Finding",
+  "description": "One specialist agent's output for a single pipeline run. Mirrors the contract in docs/04_agent_contracts.md (findings / risks / recommendations / missing_data / simulation_requests / confidence / sources).",
+  "type": "object",
+  "required": [
+    "agent",
+    "area",
+    "confidence",
+    "findings",
+    "risks",
+    "recommendations",
+    "missing_data",
+    "simulation_requests",
+    "sources",
+    "llm_generated"
+  ],
+  "properties": {
+    "agent": {
+      "type": "string",
+      "description": "Agent identifier, e.g. 'dcdc', 'filtering', 'parasitics'. Stable across runs."
+    },
+    "area": {
+      "type": "string",
+      "description": "Engineering area covered by this agent. Used as the report subsection title."
+    },
+    "llm_generated": {
+      "type": "boolean",
+      "description": "True when the finding text was produced by an LLM call. False for deterministic fallback output."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Agent's self-reported confidence in its analysis. Low when inputs are sparse."
+    },
+    "findings": {
+      "type": "array",
+      "description": "What the agent observed. Phrased as engineering hypotheses, not certainties.",
+      "items": {
+        "type": "object",
+        "required": ["title", "detail"],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["info", "low", "medium", "high", "critical"]
+          }
+        }
+      }
+    },
+    "risks": {
+      "type": "array",
+      "description": "Specific risks the agent flagged. Distinct from findings: a risk is something that may happen, a finding is something observed.",
+      "items": {
+        "type": "object",
+        "required": ["title", "detail"],
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "likelihood": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          }
+        }
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "description": "Concrete actions for the user. Each recommendation conforms to recommendation.schema.json.",
+      "items": {
+        "$ref": "recommendation.schema.json"
+      }
+    },
+    "missing_data": {
+      "type": "array",
+      "description": "Inputs the agent would have liked but did not receive. E.g. 'no stack-up data', 'no layout'.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "simulation_requests": {
+      "type": "array",
+      "description": "Follow-up simulations the agent recommends running. Consumed by the orchestrator (M2.11).",
+      "items": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "description": "Optional category: 'tran', 'ac', 'sweep', 'mc'."
+          },
+          "parameters": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "description": "Rule_ID or Source_ID strings the agent relied on. Empty when no curated rules applied.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "description": "Caveats the agent attached to its own output. E.g. 'no datasheet supplied for U1'.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "injections": {
+      "type": "array",
+      "description": "M2.10 parasitic-injection plan. Empty for every agent except the parasitics agent. Each entry conforms to parasitic_injection.schema.json.",
+      "items": {
+        "$ref": "parasitic_injection.schema.json"
+      }
+    }
+  }
+}

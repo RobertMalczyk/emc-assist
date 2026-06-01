@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/source_manifest.schema.json",
+  "title": "Source Manifest Entry",
+  "type": "object",
+  "required": [
+    "source_id",
+    "title",
+    "organization",
+    "local_path",
+    "license_notes",
+    "allowed_use"
+  ],
+  "properties": {
+    "source_id": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "organization": {
+      "type": "string"
+    },
+    "url": {
+      "type": "string"
+    },
+    "local_path": {
+      "type": "string"
+    },
+    "file_type": {
+      "type": "string"
+    },
+    "license_notes": {
+      "type": "string"
+    },
+    "allowed_use": {
+      "type": "string",
+      "enum": [
+        "link_and_summary",
+        "internal_reference",
+        "user_provided_only",
+        "do_not_ingest",
+        "check_license"
+      ]
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

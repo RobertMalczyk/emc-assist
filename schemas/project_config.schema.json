@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/project_config.schema.json",
+  "title": "EMC Assistant Project Config",
+  "type": "object",
+  "required": [
+    "project_id",
+    "name",
+    "version",
+    "created_at",
+    "inputs",
+    "analysis_scope"
+  ],
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "analysis_scope": {
+      "type": "string",
+      "enum": [
+        "conducted_emi_dc_dc",
+        "conducted_emi_ac_dc",
+        "generic_parasitics"
+      ]
+    },
+    "inputs": {
+      "type": "object",
+      "properties": {
+        "schematic_path": {
+          "type": "string"
+        },
+        "netlist_path": {
+          "type": "string"
+        },
+        "models_dir": {
+          "type": "string"
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "properties": {
+        "allow_cloud_llm": {
+          "type": "boolean",
+          "default": false
+        },
+        "allow_telemetry": {
+          "type": "boolean",
+          "default": false
+        },
+        "redact_net_names": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "ltspice": {
+      "type": "object",
+      "properties": {
+        "executable_path": {
+          "type": "string"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "dry-run",
+            "local-run"
+          ],
+          "default": "dry-run"
+        },
+        "timeout_seconds": {
+          "type": "integer",
+          "default": 120
+        }
+      }
+    }
+  }
+}

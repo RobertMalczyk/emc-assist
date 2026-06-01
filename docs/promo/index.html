@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EMC-Assist — Open EMC · conducted-EMI pre-compliance for LTspice</title>
+<meta name="description" content="EMC-Assist — open-source, local-first conducted-EMI pre-compliance tooling for LTspice simulations. Part of the Open EMC project.">
+<meta name="color-scheme" content="dark">
+<style>
+  :root{
+    --accent:oklch(0.70 0.18 268); --accent-soft:oklch(0.70 0.18 268/0.16);
+    --accent-dim:oklch(0.70 0.18 268/0.08); --accent-fg:oklch(0.99 0.02 268);
+    --grad:linear-gradient(135deg,oklch(0.70 0.18 268),oklch(0.55 0.20 308));
+    --sev-high:oklch(0.66 0.20 25); --sev-med:oklch(0.78 0.16 75);
+    --sev-low:oklch(0.70 0.16 145); --sev-info:oklch(0.72 0.10 230);
+    --bg:#0a0d12; --bg-2:#0d1117; --panel:#11151c; --panel-2:#161b24; --panel-3:#1c2230;
+    --border:#232a39; --border-strong:#2f3a4f;
+    --text:#e6edf3; --text-dim:#b1bcce; --text-muted:#6f7c91; --text-faint:#4a5468;
+    --mono:"JetBrains Mono","IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+    --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --radius:10px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:radial-gradient(1200px 600px at 70% -10%,oklch(0.70 0.18 268/0.10),transparent),var(--bg);
+       color:var(--text);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  .mono{font-family:var(--mono)}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px);
+      background:oklch(0.16 0.02 268/0.6);border-bottom:1px solid var(--border)}
+  nav .wrap{display:flex;align-items:center;gap:18px;height:56px}
+  .logo{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-weight:700}
+  .logo .mark{width:30px;height:30px;border-radius:7px;background:var(--grad);display:grid;place-items:center;
+      color:var(--accent-fg);font-size:11px}
+  nav a.link{color:var(--text-muted);text-decoration:none;font-size:13px;font-family:var(--mono)}
+  nav a.link:hover{color:var(--text)}
+  nav .spacer{flex:1}
+  .ghost{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border:1px solid var(--border-strong);
+      border-radius:8px;font-family:var(--mono);font-size:12px;text-decoration:none;color:var(--text-dim)}
+  .ghost:hover{border-color:var(--accent);color:var(--text)}
+
+  /* hero */
+  header{padding:84px 0 48px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:clamp(34px,5vw,56px);line-height:1.05;margin:14px 0 8px;letter-spacing:-.02em}
+  h1 .tint{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:19px;color:var(--text-dim);max-width:760px}
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:8px 13px;border:1px solid var(--border);
+      border-radius:999px;background:var(--panel);font-family:var(--mono);font-size:12.5px;color:var(--text-dim)}
+  .chip b{color:var(--text)}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent)}
+
+  /* sections */
+  section{padding:54px 0;border-top:1px solid var(--border)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+  h2{font-size:28px;margin:0;letter-spacing:-.01em}
+  .sec-sub{color:var(--text-muted);max-width:720px;margin:6px 0 26px;font-size:15px}
+  .kicker{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+
+  /* cards */
+  .grid{display:grid;gap:16px}
+  .g3{grid-template-columns:repeat(3,1fr)} .g2{grid-template-columns:repeat(2,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:880px){.g3,.g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}}
+  @media(max-width:560px){.g3,.g4,.g2{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px;transition:.15s}
+  .card:hover{border-color:var(--border-strong);transform:translateY(-2px)}
+  .card h3{margin:0 0 6px;font-size:16px;display:flex;align-items:center;gap:9px}
+  .card p{margin:0;color:var(--text-dim);font-size:14px}
+  .ic{width:30px;height:30px;border-radius:8px;background:var(--accent-soft);display:grid;place-items:center;
+      color:var(--accent);flex:none}
+  .badge{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+      padding:2px 7px;border-radius:6px;border:1px solid var(--border)}
+  .b-ship{color:var(--sev-low);border-color:oklch(0.70 0.16 145/0.4);background:oklch(0.70 0.16 145/0.08)}
+  .b-road{color:var(--sev-med);border-color:oklch(0.78 0.16 75/0.4);background:oklch(0.78 0.16 75/0.08)}
+
+  /* pipeline stepper */
+  .steps{display:flex;gap:0;flex-wrap:wrap;counter-reset:s}
+  .step{flex:1;min-width:150px;position:relative;padding:16px 14px;border:1px solid var(--border);
+      background:var(--panel);margin-left:-1px}
+  .step:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+  .step:last-child{border-radius:0 var(--radius) var(--radius) 0}
+  .step .n{counter-increment:s;font-family:var(--mono);font-size:11px;color:var(--accent)}
+  .step .n::before{content:"0" counter(s)" · "}
+  .step .t{font-weight:600;font-size:14px;margin-top:3px}
+  .step .d{font-family:var(--mono);font-size:11px;color:var(--text-muted);margin-top:4px}
+
+  /* spectrum panel */
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--text-dim);margin-top:6px}
+  .legend i{display:inline-block;width:16px;height:0;border-top-width:3px;border-top-style:solid;vertical-align:middle;margin-right:6px}
+
+  /* agents */
+  .tag{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border:1px solid var(--border);border-radius:8px;
+      background:var(--panel);font-family:var(--mono);font-size:12.5px;color:var(--text-dim)}
+  .tags{display:flex;flex-wrap:wrap;gap:9px}
+  .sq{width:8px;height:8px;border-radius:2px;background:var(--accent)}
+
+  /* mock screens */
+  .mock{background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .mock-top{display:flex;align-items:center;gap:8px;padding:9px 13px;border-bottom:1px solid var(--border);
+      font-family:var(--mono);font-size:11px;color:var(--text-muted);background:var(--panel)}
+  .mock-top .tl{display:flex;gap:5px}.tl span{width:9px;height:9px;border-radius:50%;background:var(--panel-3)}
+  .mock-body{padding:14px}
+  .verdict{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+  .pill{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--border);color:var(--text-dim)}
+  .pill.ok{color:var(--sev-low);border-color:oklch(0.70 0.16 145/0.5)}
+  .pill.info{color:var(--sev-info);border-color:oklch(0.72 0.10 230/0.5)}
+  .pill.warn{color:var(--sev-med);border-color:oklch(0.78 0.16 75/0.5)}
+  .pill.hi{color:var(--sev-high);border-color:oklch(0.66 0.20 25/0.5)}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+  @media(max-width:560px){.stats{grid-template-columns:1fr 1fr}}
+  .stat{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px}
+  .stat .l{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+  .stat .v{font-size:18px;font-weight:700;margin-top:3px}
+  .stat .s{font-family:var(--mono);font-size:11px;color:var(--text-faint)}
+  table.t{width:100%;border-collapse:collapse;font-size:13px;margin-top:8px}
+  table.t th{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted);
+      text-align:left;padding:6px 8px;border-bottom:1px solid var(--border)}
+  table.t td{padding:6px 8px;border-bottom:1px solid var(--border);color:var(--text-dim)}
+  table.t td.mono,table.t td.num{font-family:var(--mono)}
+  .num{text-align:right}
+  .find{border-left:3px solid var(--sev-high);background:var(--panel);border-radius:8px;padding:11px 13px;margin-bottom:8px}
+  .find .h{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .area{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-muted)}
+
+  /* roadmap */
+  .road{display:grid;gap:0}
+  .ms{display:grid;grid-template-columns:140px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--border)}
+  .ms .when{font-family:var(--mono);font-size:12px;color:var(--accent)}
+  .ms .what b{font-size:15px}
+  .ms .what p{margin:3px 0 0;color:var(--text-dim);font-size:14px}
+
+  .note{font-family:var(--mono);font-size:11.5px;color:var(--text-muted)}
+  .disclaimer{display:flex;gap:11px;align-items:flex-start;border:1px solid oklch(0.78 0.16 75/0.35);
+      background:oklch(0.78 0.16 75/0.06);border-radius:var(--radius);padding:14px 16px;color:var(--text-dim);font-size:14px}
+  footer{padding:40px 0 64px;border-top:1px solid var(--border);color:var(--text-muted);font-size:13px}
+
+  /* workflow diagram + agents-running */
+  @keyframes dash{to{stroke-dashoffset:-24}}
+  @keyframes pulse{0%,100%{opacity:.45;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+  .flow-line{stroke-dasharray:5 5;animation:dash 1.1s linear infinite}
+  .wf-node rect{fill:var(--panel);stroke:var(--border)}
+  .wf-node.k rect{stroke:var(--accent)}
+  .wf-node .l1{fill:var(--text);font-family:var(--mono);font-size:11px}
+  .wf-node .l2{fill:var(--text-muted);font-family:var(--mono);font-size:9px}
+  .wf-cap{font-family:var(--mono);font-size:11.5px;color:var(--text-muted);text-align:center;margin:18px 0 14px}
+  .agentflow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;gap:14px;align-items:center}
+  @media(max-width:900px){.agentflow{grid-template-columns:1fr;justify-items:center}}
+  .afnode{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:9px 12px;min-width:128px}
+  .afnode.accent{border-color:var(--accent);background:var(--accent-dim)}
+  .afk{font-family:var(--mono);font-size:11px;color:var(--text)}
+  .afv{font-family:var(--mono);font-size:10px;color:var(--text-muted);margin-top:2px}
+  .afarrow{font-family:var(--mono);font-size:11px;color:var(--accent);white-space:nowrap;text-align:center}
+  .afgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+  @media(max-width:560px){.afgrid{grid-template-columns:1fr 1fr}}
+  .agent{display:flex;align-items:center;gap:7px;background:var(--panel);border:1px solid var(--border);border-radius:7px;padding:6px 9px;font-family:var(--mono);font-size:11px;color:var(--text-dim)}
+  .agent .rdot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);animation:pulse 1.5s ease-in-out infinite;flex:none}
+  .afout{display:flex;flex-direction:column;gap:8px}
+  @media(prefers-reduced-motion:reduce){.flow-line,.agent .rdot{animation:none}}
+
+  /* full app-shell mockup (rail + topbar + active screen) */
+  .appwin{border:1px solid var(--border-strong);border-radius:12px;overflow:hidden;background:var(--bg-2);box-shadow:0 24px 70px rgba(0,0,0,.45);margin-bottom:24px}
+  .appwin .winbar{display:flex;align-items:center;gap:8px;padding:9px 13px;background:var(--panel);border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--text-muted)}
+  .appwin .winbar .tl{display:flex;gap:5px}.appwin .winbar .tl span{width:10px;height:10px;border-radius:50%;background:var(--panel-3)}
+  .appgrid{display:grid;grid-template-columns:214px 1fr;min-height:392px}
+  @media(max-width:680px){.appgrid{grid-template-columns:150px 1fr}}
+  .arail{background:var(--bg-2);border-right:1px solid var(--border);padding:12px 10px}
+  .abrand{display:flex;gap:9px;align-items:center;margin:2px 4px 8px}
+  .abrand .mk{width:28px;height:28px;border-radius:7px;background:var(--grad);display:grid;place-items:center;color:var(--accent-fg);font-size:10px;font-weight:700;font-family:var(--mono)}
+  .abrand .t1{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text)}
+  .abrand .t2{font-family:var(--mono);font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em}
+  .asect{font-family:var(--mono);font-size:9px;letter-spacing:.14em;color:var(--text-faint);margin:13px 4px 6px;text-transform:uppercase;display:flex;justify-content:space-between}
+  .anav{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:7px;font-family:var(--mono);font-size:11.5px;color:var(--text-dim);margin-bottom:1px}
+  .anav .ico{width:14px;text-align:center;color:var(--text-muted);flex:none}
+  .anav .num{margin-left:auto;font-size:9px;color:var(--text-faint)}
+  .anav.active{background:var(--accent-dim);color:var(--text)}
+  .anav.active .ico{color:var(--accent)}
+  .anav .ck{margin-left:auto;color:var(--sev-low);font-size:10px}
+  .anav.locked{opacity:.5}
+  .anav .soon{margin-left:auto;font-size:8px;border:1px solid var(--border);border-radius:5px;padding:1px 5px;color:var(--text-muted);letter-spacing:.05em}
+  .amain{display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+  .atop{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel-2);flex-wrap:wrap}
+  .acrumb{font-family:var(--mono);font-size:11px;color:var(--text-muted)}.acrumb b{color:var(--text)}
+  .ameta{margin-left:auto;display:flex;gap:12px;font-family:var(--mono);font-size:10px;color:var(--text-muted)}.ameta b{color:var(--text-dim)}
+  .apriv{font-family:var(--mono);font-size:10px;color:var(--sev-low);border:1px solid var(--border);border-radius:999px;padding:3px 9px}
+  .asave{font-family:var(--mono);font-size:10px;color:var(--text-dim);border:1px solid var(--border-strong);border-radius:7px;padding:4px 9px}
+  .abody{padding:16px;overflow:hidden}
+
+</style>
+</head>
+<body>
+
+<nav><div class="wrap">
+  <div class="logo"><span class="mark">OE</span> Open&nbsp;EMC <span style="color:var(--text-muted);font-weight:400">/ EMC-Assist</span></div>
+  <a class="link" href="#pipeline">Workflow</a>
+  <a class="link" href="#capabilities">Capabilities</a>
+  <a class="link" href="#parasitics">Parasitics</a>
+  <a class="link" href="#detectors">Detectors</a>
+  <a class="link" href="#agents">Agents &amp; RAG</a>
+  <a class="link" href="#architecture">Architecture</a>
+  <a class="link" href="#screens">Screens</a>
+  <a class="link" href="#roadmap">Roadmap</a>
+  <span class="spacer"></span>
+  <a class="link" href="https://github.com/RobertMalczyk/emc-assist/tree/main/docs" target="_blank" rel="noopener">Docs ↗</a>
+  <a class="ghost" href="https://github.com/RobertMalczyk/emc-assist" target="_blank" rel="noopener">GitHub ↗</a>
+</div></nav>
+
+<header><div class="wrap">
+  <div class="eyebrow">Open EMC · open-source, local-first EMC tooling</div>
+  <h1>EMC-Assist — find conducted-EMI risk <span class="tint">before the lab.</span></h1>
+  <p class="lede">Open-source, local-first tooling for conducted-EMI pre-compliance workflows: model PCB parasitics, generate LISN- and cable-aware LTspice testbenches, compare EMI filter variants, and document risks before the lab. A panel of specialist LLM agents (with a redacted, citation-backed knowledge base) explains the result — as engineering diagnostics, never certification.</p>
+  <div class="chips">
+    <span class="chip"><span class="dot"></span> <b>100%</b> local — schematic never leaves the machine</span>
+    <span class="chip"><b>Apache-2.0</b> open source</span>
+    <span class="chip"><b>11</b> specialist agents + synthesiser</span>
+    <span class="chip">CISPR-like <b>peak / QP / avg</b> detectors</span>
+    <span class="chip">local <b>RAG</b> knowledge base</span>
+    <span class="chip">min·typ·max <b>corner sweep</b></span>
+  </div>
+</div></header>
+
+<!-- OPEN EMC FAMILY -->
+<section id="open-emc" style="padding:34px 0"><div class="wrap">
+  <div class="grid g2" style="align-items:center;gap:20px">
+    <div>
+      <span class="kicker">The Open EMC project</span>
+      <h2 style="margin:6px 0 8px">Open-source tools for practical EMC pre-compliance workflows</h2>
+      <p class="sec-sub" style="margin-bottom:0">EMC-Assist is the first Open EMC project — a local-first conducted-EMI workflow for LTspice-based simulations. Independent and community-driven; the deterministic core runs entirely on your machine, with an opt-in LLM layer on top.</p>
+    </div>
+    <div class="panel">
+      <div class="note" style="margin-bottom:8px;color:var(--text-dim)">Project links</div>
+      <table class="t" style="margin-top:0">
+        <tr><td>Main site</td><td class="mono"><a href="https://openemc.dev" style="color:var(--accent)">openemc.dev</a></td></tr>
+        <tr><td>Tool</td><td class="mono"><a href="https://openemc.dev/emc-assist" style="color:var(--accent)">openemc.dev/emc-assist</a></td></tr>
+        <tr><td>Docs</td><td class="mono"><a href="https://github.com/RobertMalczyk/emc-assist/tree/main/docs" style="color:var(--accent)">/emc-assist/docs</a></td></tr>
+        <tr><td>Source</td><td class="mono"><a href="https://github.com/RobertMalczyk/emc-assist" style="color:var(--accent)">github.com/RobertMalczyk/emc-assist</a></td></tr>
+      </table>
+    </div>
+  </div>
+</div></section>
+
+<!-- PIPELINE -->
+<section id="pipeline"><div class="wrap">
+  <div class="sec-head"><span class="kicker">How it works</span><h2>A run, end to end</h2></div>
+  <p class="sec-sub">A deterministic spine writes an auditable artifact at every stage — nothing is a black box. After simulation, an LLM panel fans out over the result, then converges into one diagnosis.</p>
+
+  <!-- deterministic spine -->
+  <svg viewBox="0 0 1000 96" style="width:100%;height:auto;display:block" role="img" aria-label="pipeline flow">
+    <defs><marker id="ah" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0 0 L6.5 3 L0 6 z" fill="var(--accent)"/></marker></defs>
+    <g class="flow-line" stroke="var(--accent)" stroke-width="1.6" fill="none">
+      <line x1="158" y1="48" x2="171" y2="48" marker-end="url(#ah)"/>
+      <line x1="323" y1="48" x2="336" y2="48" marker-end="url(#ah)"/>
+      <line x1="488" y1="48" x2="501" y2="48" marker-end="url(#ah)"/>
+      <line x1="653" y1="48" x2="666" y2="48" marker-end="url(#ah)"/>
+      <line x1="818" y1="48" x2="831" y2="48" marker-end="url(#ah)"/>
+    </g>
+    <g class="wf-node"><rect x="8" y="20" width="150" height="56" rx="8"/><text class="l1" x="83" y="44" text-anchor="middle">01 · Import</text><text class="l2" x="83" y="60" text-anchor="middle">.asc / .cir</text></g>
+    <g class="wf-node"><rect x="173" y="20" width="150" height="56" rx="8"/><text class="l1" x="248" y="44" text-anchor="middle">02 · Topology</text><text class="l2" x="248" y="60" text-anchor="middle">net roles</text></g>
+    <g class="wf-node"><rect x="338" y="20" width="150" height="56" rx="8"/><text class="l1" x="413" y="44" text-anchor="middle">03 · Parasitics</text><text class="l2" x="413" y="60" text-anchor="middle">min·typ·max / net</text></g>
+    <g class="wf-node"><rect x="503" y="20" width="150" height="56" rx="8"/><text class="l1" x="578" y="44" text-anchor="middle">04 · Testbench</text><text class="l2" x="578" y="60" text-anchor="middle">LISN+cable+inj</text></g>
+    <g class="wf-node"><rect x="668" y="20" width="150" height="56" rx="8"/><text class="l1" x="743" y="44" text-anchor="middle">05 · Variants</text><text class="l2" x="743" y="60" text-anchor="middle">×3 min/typ/max</text></g>
+    <g class="wf-node k"><rect x="833" y="20" width="150" height="56" rx="8"/><text class="l1" x="908" y="44" text-anchor="middle">06 · Simulate</text><text class="l2" x="908" y="60" text-anchor="middle">LTspice + detectors</text></g>
+  </svg>
+
+  <div class="wf-cap">↓ after each simulation, the analysis fans out to the agent panel — running in the background ↓</div>
+
+  <!-- agents running in background -->
+  <div class="agentflow">
+    <div class="afnode"><div class="afk">simulation output</div><div class="afv">.raw · metrics · CISPR-like detectors</div></div>
+    <div class="afarrow">fan&#8209;out&nbsp;→</div>
+    <div>
+      <div class="afgrid">
+        <div class="agent"><span class="rdot" style="animation-delay:0s"></span>dcdc</div>
+        <div class="agent"><span class="rdot" style="animation-delay:.12s"></span>filtering</div>
+        <div class="agent"><span class="rdot" style="animation-delay:.24s"></span>power_integrity</div>
+        <div class="agent"><span class="rdot" style="animation-delay:.36s"></span>decoupling</div>
+        <div class="agent"><span class="rdot" style="animation-delay:.48s"></span>parasitics</div>
+        <div class="agent"><span class="rdot" style="animation-delay:.60s"></span>stackup</div>
+        <div class="agent"><span class="rdot" style="animation-delay:.72s"></span>high_speed</div>
+        <div class="agent"><span class="rdot" style="animation-delay:.84s"></span>mixed_signal</div>
+        <div class="agent"><span class="rdot" style="animation-delay:.96s"></span>ic_vendor</div>
+        <div class="agent"><span class="rdot" style="animation-delay:1.08s"></span>layout_risk</div>
+        <div class="agent"><span class="rdot" style="animation-delay:1.20s"></span>signal_map</div>
+      </div>
+      <div class="note" style="text-align:center;margin-top:8px">11 specialists run in parallel · each one focused LLM call · redacted payloads only</div>
+    </div>
+    <div class="afarrow">→&nbsp;cluster&nbsp;→</div>
+    <div class="afout">
+      <div class="afnode"><div class="afk">orchestrator</div><div class="afv">clusters findings</div></div>
+      <div class="afnode"><div class="afk">synthesiser</div><div class="afv">one diagnosis</div></div>
+      <div class="afnode accent"><div class="afk">diagnosis → report</div><div class="afv">conf 70% · cited</div></div>
+    </div>
+  </div>
+  <p class="note" style="margin-top:14px">A pre-composition <b>LISN-mode agent</b> also shapes stage 04 before simulation. The deterministic core runs with or without the LLM layer — it is an assistant, never the source of truth.</p>
+</div></section>
+
+<!-- CAPABILITIES -->
+<section id="capabilities"><div class="wrap">
+  <div class="sec-head"><span class="kicker">Capabilities</span><h2>What's inside</h2></div>
+  <p class="sec-sub">A deterministic engineering core, with an optional LLM layer bolted on top — never the source of truth.</p>
+  <div class="grid g3">
+    <div class="card"><h3><span class="ic">◇</span> Per-net parasitic injection <span class="badge b-ship">shipped</span></h3>
+      <p>Every net gets a parasitic: shunt-C universally, series R+L+C where the topology allows a clean cut. Min·typ·max bands, project overrides, and an opt-in LLM negligibility screen.</p></div>
+    <div class="card"><h3><span class="ic">≈</span> Corner sweep <span class="badge b-ship">shipped</span></h3>
+      <p>Parasitics are uncertain, so we sweep them. Each run produces ranked min/typ/max variants — an honest spread, not a single "certain" number.</p></div>
+    <div class="card"><h3><span class="ic">⎍</span> CISPR-like detectors <span class="badge b-ship">shipped</span></h3>
+      <p>Peak, quasi-peak (meter-time-constant model) and average detector metrics built on CISPR 16-1-1 constants, compared against a configured EN 55022 Class B reference curve — an uncalibrated pre-compliance diagnostic, not a certified-receiver reading.</p></div>
+    <div class="card"><h3><span class="ic">⌬</span> 11 specialist agents <span class="badge b-ship">shipped</span></h3>
+      <p>One focused LLM call per area (DC/DC, filtering, layout, decoupling, parasitics…), plus a pre-composition LISN-mode agent, an orchestrator and a diagnostic synthesiser.</p></div>
+    <div class="card"><h3><span class="ic">⌕</span> Local RAG <span class="badge b-ship">shipped</span></h3>
+      <p>Curated EMC seed rules, local embeddings and a pure-numpy vector index — no FAISS/Chroma, no cloud index. Every rule carries a source or is flagged as an engineering estimate.</p></div>
+    <div class="card"><h3><span class="ic">⛨</span> Copyright-safe redaction <span class="badge b-ship">shipped</span></h3>
+      <p>Outbound LLM payloads carry only <span class="mono">rule_id</span> + <span class="mono">source_id</span> + our summary + a ≤200-char excerpt. Full vendor text and your netlist never leave the machine.</p></div>
+    <div class="card"><h3><span class="ic">▤</span> Auditable reports <span class="badge b-ship">shipped</span></h3>
+      <p>Markdown / HTML (PDF optional) with an assumptions table, parasitics table, before/after, a risk list, cited sources and a pre-compliance disclaimer.</p></div>
+    <div class="card"><h3><span class="ic">▦</span> Desktop UI <span class="badge b-ship">shipped (M3)</span></h3>
+      <p>A pywebview shell over the same service core: Projects → Report, with stage gating, live logs, the detector spectrum and a stale-data guard.</p></div>
+    <div class="card"><h3><span class="ic">⚿</span> Local-first &amp; private <span class="badge b-ship">shipped</span></h3>
+      <p>LTspice runs locally and is never bundled. Cloud LLM is opt-in and key-gated; with it off, no network calls happen under any action.</p></div>
+    <div class="card"><h3><span class="ic">⤓</span> Schematic import &amp; topology <span class="badge b-ship">shipped</span></h3>
+      <p>Import an <span class="mono">.asc</span>/<span class="mono">.cir</span>, parse R/L/C/V/I/X/M/D + <span class="mono">.model</span>/<span class="mono">.param</span>/<span class="mono">.tran</span>, and derive net roles (power / switch / signal / return) for the analysis.</p></div>
+    <div class="card"><h3><span class="ic">⌁</span> AI: suggest negligible <span class="badge b-ship">shipped</span></h3>
+      <p>An opt-in LLM negligibility screen pre-deselects nets that won't move the conducted band — you keep the final say. Key-gated; deterministic otherwise.</p></div>
+    <div class="card"><h3><span class="ic">⟳</span> AI: re-evaluate values (RAG) <span class="badge b-ship">shipped</span></h3>
+      <p>One batched LLM+RAG pass refines every net's R/L/C into citation-backed min·typ·max. Preview → review → apply; the deterministic prior is the fallback.</p></div>
+    <div class="card"><h3><span class="ic">∿</span> Time-domain waveform analyzer <span class="badge b-ship">shipped</span></h3>
+      <p>Two time-aligned panels: the LISN-measured <span class="mono">V(meas)</span> over a comparison trace (load current by default; four more LLM/heuristic-picked for EMI relevance).</p></div>
+    <div class="card"><h3><span class="ic">⌖</span> Quasi-peak at frequency &amp; sweep <span class="badge b-ship">shipped</span></h3>
+      <p>Receiver-like quasi-peak at a single frequency with margin, or a full sweep across CISPR Band B — read straight off the run's <span class="mono">.raw</span>.</p></div>
+    <div class="card"><h3><span class="ic">▤</span> Standardized recommendation JSON <span class="badge b-ship">shipped</span></h3>
+      <p>Every finding carries problem · evidence · proposed change · value range · assumptions · limitations · sim/measurement requirement · confidence · severity · sources.</p></div>
+    <div class="card"><h3><span class="ic">✓</span> Accept / reject feedback loop <span class="badge b-ship">shipped</span></h3>
+      <p>Decide on each recommendation; decisions persist to <span class="mono">decisions/*.json</span> and flow into the report's decision log.</p></div>
+    <div class="card"><h3><span class="ic">⚙</span> Simulation-settings review <span class="badge b-ship">shipped</span></h3>
+      <p>A deterministic, free check of your <span class="mono">.tran</span> window/timestep against the conducted band and switching edges — review proposed settings before they apply.</p></div>
+    <div class="card"><h3><span class="ic">◷</span> Honest-data stale guard <span class="badge b-ship">shipped</span></h3>
+      <p>Edit any upstream input and the whole downstream chain is flagged stale; Results / Findings / Report refuse to present old numbers as current.</p></div>
+    <div class="card"><h3><span class="ic">⌗</span> One service core, two front-ends <span class="badge b-ship">shipped</span></h3>
+      <p>A typed <span class="mono">service/</span> layer is the product; the CLI and the desktop app are thin adapters over it, with a structured logging seam and offline schema validation.</p></div>
+    <div class="card"><h3><span class="ic">▥</span> LTspice <span class="mono">.asc</span> visualisation export <span class="badge b-ship">shipped</span></h3>
+      <p>The composed testbench is also emitted as an <span class="mono">.asc</span> you can open in LTspice to eyeball the LISN + cable + injection wiring.</p></div>
+  </div>
+</div></section>
+
+<!-- PARASITICS & TESTBENCH -->
+<section id="parasitics"><div class="wrap">
+  <div class="sec-head"><span class="kicker">Parasitics &amp; testbench</span><h2>Every net modelled — then wired into a CISPR bench</h2></div>
+  <p class="sec-sub">PCB parasitics dominate conducted EMI and they're uncertain — so the tool estimates a min·typ·max band for every net from role-tuned geometry, cites a rule (or marks it an engineering estimate), injects them, and assembles a LISN testbench around your circuit. An LLM can screen out negligible nets and refine the values against the knowledge base — both opt-in, both reviewable.</p>
+
+  <div class="grid g2">
+    <div class="panel">
+      <h3 style="margin:0 0 10px">Estimated structures — case_003 (real, min·typ·max)</h3>
+      <table class="t">
+        <tr><th>Structure</th><th>Type</th><th class="num">min</th><th class="num">typ</th><th class="num">max</th><th>conf</th><th>src</th></tr>
+        <tr><td class="mono">trace R 25×0.5 1oz</td><td>R mΩ</td><td class="num">20.2</td><td class="num">25.3</td><td class="num">31.6</td><td><span class="pill ok">high</span></td><td class="mono">R001</td></tr>
+        <tr><td class="mono">trace L iso 25×0.5</td><td>L nH</td><td class="num">12.6</td><td class="num">25.2</td><td class="num">37.8</td><td><span class="pill warn">med</span></td><td class="mono">R002</td></tr>
+        <tr><td class="mono">trace C Z0 25–50</td><td>C pF</td><td class="num">2.34</td><td class="num">3.35</td><td class="num">4.35</td><td><span class="pill ok">high</span></td><td class="mono">R004/5</td></tr>
+        <tr><td class="mono">plane-pair C 100mm²</td><td>C pF</td><td class="num">1.90</td><td class="num">2.38</td><td class="num">2.97</td><td><span class="pill warn">med</span></td><td class="mono">R012</td></tr>
+        <tr><td class="mono">via L h1.6 d0.3</td><td>L nH</td><td class="num">0.91</td><td class="num">1.30</td><td class="num">1.82</td><td><span class="pill warn">med</span></td><td class="mono">R010</td></tr>
+        <tr><td class="mono">loop self-resonance</td><td>MHz</td><td class="num">438</td><td class="num">548</td><td class="num">685</td><td><span class="pill ok">high</span></td><td class="mono">R030</td></tr>
+      </table>
+      <p class="note" style="margin-top:10px">Models cover trace R/L/C, vias, plane pairs, cables and capacitor ESR/ESL/SRF. Injection: a <b>shunt-C</b> on every net, plus a <b>series R+L+C</b> where the net is a clean point-to-point cut; each L gets a Q-damping resistor so tiny pF/nH tanks don't blow up transient time. <span class="mono">--parasitics-report-only</span> keeps estimates in the report but out of the sim; project overrides pin any value.</p>
+    </div>
+
+    <div class="grid" style="gap:16px">
+      <div class="card"><h3><span class="ic">⌁</span> AI: suggest negligible</h3>
+        <p>The opt-in negligibility screen reads the per-net plan and pre-deselects nets that won't change the conducted band. For case_003 the 17 LTC7800 controller-pin nets are skipped, leaving 14 power/switch/signal nets.</p></div>
+      <div class="card"><h3><span class="ic">⟳</span> AI: re-evaluate values (RAG)</h3>
+        <p>A single batched LLM+RAG call turns each net's rule-of-thumb band into a citation-backed min·typ·max. You review the proposals (with their cited sources) and apply only the typ overrides — no second call, full audit kept.</p></div>
+      <div class="mock">
+        <div class="mock-top"><span class="tl"><span></span><span></span><span></span></span> Injection summary — testbench.cir</div>
+        <div class="mock-body">
+          <p class="mono" style="margin:0 0 10px;font-size:12px;color:var(--text-dim)">V_RAIL → LISN+ → cable → [TRACE_RLC] → DUT (31 nets) → LISN-  ·  DM+CM probes</p>
+          <div class="grid g3" style="gap:10px">
+            <div class="stat"><div class="l">Series RLC</div><div class="v">6<span class="s"> nets</span></div></div>
+            <div class="stat"><div class="l">Shunt-C</div><div class="v">7<span class="s"> nets</span></div></div>
+            <div class="stat"><div class="l">Dropped · user</div><div class="v">17<span class="s"> nets</span></div></div>
+            <div class="stat"><div class="l">Dropped · AI</div><div class="v">0<span class="s"> nets</span></div></div>
+            <div class="stat"><div class="l">Input-rail inj.</div><div class="v">1<span class="s"> TRACE</span></div></div>
+            <div class="stat"><div class="l">LISN</div><div class="v">dual<span class="s"> DM+CM</span></div></div>
+          </div>
+          <p class="note" style="margin-top:10px">Signals probed <span class="mono">Vout=V(OUT)</span>, <span class="mono">Vin=V(IN)</span> · supply VIN ↦ LISN · return 0 ↦ LISN · wiring/parasitics/signal audits all green</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- DETECTORS -->
+<section id="detectors"><div class="wrap">
+  <div class="sec-head"><span class="kicker">Detectors · real data</span><h2>The conducted-emissions spectrum</h2></div>
+  <p class="sec-sub">A real per-frequency CISPR-like detector sweep from the bundled <span class="mono">case_003</span> example — an Analog Devices LTC7800 buck (12 → 3.3 V) — against the configured EN 55022 Class B reference curve. The detector flags a low-frequency quasi-peak-like exceedance above that reference curve: a pre-compliance hypothesis to confirm on the bench.</p>
+  <div class="panel">
+    <svg viewBox="0 0 1000 420" style="width:100%;height:auto;display:block" role="img" aria-label="case_003 conducted-emissions detector sweep">
+      <!-- grid -->
+      <g stroke="#232a39" stroke-width="0.6">
+        <line x1="52" y1="386" x2="984" y2="386"/><line x1="52" y1="312.4" x2="984" y2="312.4"/>
+        <line x1="52" y1="238.8" x2="984" y2="238.8"/><line x1="52" y1="165.2" x2="984" y2="165.2"/>
+        <line x1="52" y1="91.6" x2="984" y2="91.6"/><line x1="52" y1="18" x2="984" y2="18"/>
+        <line x1="385.7" y1="18" x2="385.7" y2="386"/><line x1="790.7" y1="18" x2="790.7" y2="386"/>
+      </g>
+      <!-- y labels (dBuV) -->
+      <g fill="#6f7c91" font-family="var(--mono)" font-size="10">
+        <text x="46" y="389" text-anchor="end">0</text><text x="46" y="315" text-anchor="end">20</text>
+        <text x="46" y="242" text-anchor="end">40</text><text x="46" y="168" text-anchor="end">60</text>
+        <text x="46" y="95" text-anchor="end">80</text><text x="46" y="21" text-anchor="end">100</text>
+        <text x="16" y="210" text-anchor="middle" transform="rotate(-90 16 210)">dBµV</text>
+        <text x="52" y="404" text-anchor="middle">150k</text><text x="385.7" y="404" text-anchor="middle">1 MHz</text>
+        <text x="790.7" y="404" text-anchor="middle">10 MHz</text><text x="984" y="404" text-anchor="end">30 MHz</text>
+      </g>
+      <!-- limits (dashed red / amber) -->
+      <path d="M52.0 143.1 L61.8 144.8 L71.6 146.5 L81.4 148.2 L91.2 149.9 L101.1 151.6 L110.9 153.3 L120.7 155.1 L130.5 156.8 L140.3 158.5 L150.1 160.2 L159.9 161.9 L169.7 163.6 L179.5 165.3 L189.3 167.0 L199.2 168.7 L209.0 170.4 L218.8 172.1 L228.6 173.8 L238.4 175.5 L248.2 177.2 L258.0 178.9 L267.8 179.9 L660.3 179.9 L670.1 165.2 L984.0 165.2"
+            fill="none" stroke="oklch(0.66 0.20 25)" stroke-width="1.6" stroke-dasharray="6 4"/>
+      <path d="M52.0 179.9 L258.0 215.7 L267.8 216.7 L660.3 216.7 L670.1 202.0 L984.0 202.0"
+            fill="none" stroke="oklch(0.78 0.16 75)" stroke-width="1.2" stroke-dasharray="3 3"/>
+      <!-- QP/AVG measured trace (real case_003 sweep) -->
+      <path d="M52.0 138.2 L61.8 117.8 L71.6 102.3 L81.4 100.7 L91.2 111.4 L101.1 145.0 L110.9 133.3 L120.7 116.5 L130.5 121.3 L140.3 155.1 L150.1 141.5 L159.9 128.5 L169.7 148.0 L179.5 159.4 L189.3 138.7 L199.2 166.7 L209.0 154.7 L218.8 153.6 L228.6 179.5 L238.4 156.3 L248.2 193.9 L258.0 163.2 L267.8 186.3 L277.6 177.0 L287.5 174.3 L297.3 222.2 L307.1 183.4 L316.9 181.0 L326.7 197.5 L336.5 229.1 L346.3 215.4 L356.1 206.5 L365.9 205.9 L375.7 210.8 L385.6 223.3 L395.4 239.1 L405.2 215.4 L415.0 207.5 L424.8 230.9 L434.6 217.3 L444.4 229.5 L454.2 217.4 L464.0 237.8 L473.9 244.6 L483.7 237.0 L493.5 239.8 L503.3 250.8 L513.1 240.8 L522.9 235.9 L532.7 252.4 L542.5 248.5 L552.3 246.8 L562.1 250.2 L572.0 255.0 L581.8 264.1 L591.6 259.5 L601.4 266.6 L611.2 269.6 L621.0 270.0 L630.8 269.2 L640.6 274.1 L650.4 276.8 L660.3 277.3 L670.1 278.4 L679.9 279.7 L689.7 281.8 L699.5 285.8 L709.3 287.1 L719.1 289.3 L728.9 290.0 L738.7 292.3 L748.5 293.7 L758.4 295.5 L768.2 298.1 L778.0 300.0 L787.8 301.1 L797.6 303.6 L807.4 305.2 L817.2 306.5 L827.0 308.7 L836.8 310.6 L846.7 312.3 L856.5 313.8 L866.3 315.8 L876.1 317.8 L885.9 319.3 L895.7 321.3 L905.5 323.1 L915.3 325.0 L925.1 326.6 L934.9 328.5 L944.8 330.4 L954.6 332.0 L964.4 333.7 L974.2 335.5 L984.0 337.5"
+            fill="none" stroke="oklch(0.70 0.18 268)" stroke-width="2"/>
+      <!-- worst QP marker -->
+      <circle cx="81.4" cy="100.7" r="5" fill="none" stroke="oklch(0.66 0.20 25)" stroke-width="2"/>
+      <text x="92" y="96" fill="oklch(0.66 0.20 25)" font-family="var(--mono)" font-size="12">QP +12.9 dB over @ ~177 kHz</text>
+    </svg>
+    <div class="legend">
+      <span><i style="border-color:oklch(0.70 0.18 268)"></i>QP ≈ AVG · V(meas)</span>
+      <span><i style="border-color:oklch(0.66 0.20 25);border-top-style:dashed"></i>QP limit (EN 55022 B)</span>
+      <span><i style="border-color:oklch(0.78 0.16 75);border-top-style:dashed"></i>AVG limit</span>
+    </div>
+    <p class="note" style="margin-top:12px">Real artifact: <span class="mono">results/spectrum.json</span> · 96-point sweep · 150 kHz–30 MHz · trace V(meas). Margins are pre-compliance estimates — not a CISPR-16 lab measurement.</p>
+  </div>
+</div></section>
+
+<!-- AGENTS + RAG -->
+<section id="agents"><div class="wrap">
+  <div class="sec-head"><span class="kicker">Agents &amp; RAG</span><h2>A panel of specialists — that cite their sources</h2></div>
+  <p class="sec-sub">After simulation, 11 area specialists each produce structured recommendations; an orchestrator clusters them and a synthesiser writes one top-level diagnosis. A pre-composition LISN-mode agent shapes the testbench. Each is a single focused call — no autonomous loops.</p>
+  <div class="tags" style="margin-bottom:22px">
+    <span class="tag"><span class="sq"></span>dcdc</span><span class="tag"><span class="sq"></span>filtering</span>
+    <span class="tag"><span class="sq"></span>power_integrity</span><span class="tag"><span class="sq"></span>decoupling</span>
+    <span class="tag"><span class="sq"></span>parasitics</span><span class="tag"><span class="sq"></span>stackup</span>
+    <span class="tag"><span class="sq"></span>high_speed</span><span class="tag"><span class="sq"></span>mixed_signal</span>
+    <span class="tag"><span class="sq"></span>ic_vendor</span><span class="tag"><span class="sq"></span>layout_risk</span>
+    <span class="tag"><span class="sq"></span>signal_map</span>
+    <span class="tag" style="border-color:var(--border-strong)">+ orchestrator</span>
+    <span class="tag" style="border-color:var(--border-strong)">+ synthesiser</span>
+    <span class="tag" style="border-color:var(--border-strong)">+ LISN-mode (pre-compose)</span>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <h3>Diagnosis — <span class="mono" style="font-size:13px;color:var(--text-muted)">case_003, real</span></h3>
+      <div class="verdict" style="margin-top:6px">
+        <p style="flex:1">“Switch-node (hot-loop) <b>dv/dt</b> likely dominates conducted EMI, with input-filter resonance a secondary contributor.” The simulation shows differential-mode amplitude far above common-mode (20.85 V vs 10.40 V) — consistent with DM-driven emission from a high-dv/dt node.</p>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <span class="pill info">confidence 70%</span><span class="pill">LLM-synthesised</span>
+        <span class="pill">cites SRC-045, SRC-082</span><span class="pill warn">hypothesis · verify on bench</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>What we send to the cloud (when enabled)</h3>
+      <table class="t">
+        <tr><th>Always sent</th><th>Never sent</th></tr>
+        <tr><td class="mono" style="color:var(--sev-low)">rule_id · source_id</td><td class="mono" style="color:var(--sev-high)">your schematic / netlist</td></tr>
+        <tr><td class="mono" style="color:var(--sev-low)">our own summary</td><td class="mono" style="color:var(--sev-high)">full vendor document text</td></tr>
+        <tr><td class="mono" style="color:var(--sev-low)">≤200-char excerpt*</td><td class="mono" style="color:var(--sev-high)">net names (redacted)</td></tr>
+      </table>
+      <p class="note" style="margin-top:10px">*only from permissively-licensed sources. Every outbound payload is logged to <span class="mono">results/llm/*.jsonl</span>. Cloud LLM is off by default.</p>
+    </div>
+  </div>
+  <p class="sec-sub" style="margin-top:22px;margin-bottom:10px">A slice of the real findings for case_003 — 11 areas, ~37 recommendations:</p>
+  <div class="find"><div class="h"><span class="pill hi">HIGH</span><span class="area">dcdc</span><span>Differential-mode emissions are dominant in the simulation (dm_peak &gt; cm_peak).</span><span class="pill" style="margin-left:auto">conf 70%</span></div></div>
+  <div class="find" style="border-left-color:var(--sev-high)"><div class="h"><span class="pill hi">HIGH</span><span class="area">power_integrity</span><span>Likely LC resonance near 156 kHz amplifying conducted noise.</span><span class="pill" style="margin-left:auto">conf 60%</span></div></div>
+  <div class="find" style="border-left-color:var(--sev-high)"><div class="h"><span class="pill hi">HIGH</span><span class="area">layout_risk</span><span>Unknown hot-loop area and loop inductance around the switch node and input decoupling.</span><span class="pill" style="margin-left:auto">conf 30%</span></div></div>
+</div></section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture"><div class="wrap">
+  <div class="sec-head"><span class="kicker">Architecture</span><h2>One service core, two front-ends</h2></div>
+  <p class="sec-sub">A typed <span class="mono">service/</span> layer is the product; the CLI and the desktop app are thin adapters over it. The deterministic spine writes an auditable artifact at every stage; the agent, RAG and LLM layers sit on top — opt-in, and never the source of truth. Everything runs locally: LTspice is a local subprocess, and only redacted, structured payloads ever leave the machine, only when cloud LLM is explicitly enabled.</p>
+
+  <div class="panel">
+    <svg viewBox="0 0 1000 486" style="width:100%;height:auto;display:block" role="img" aria-label="EMC-Assist architecture: front-ends over a service core, a deterministic spine, and opt-in agent/RAG/LLM layers">
+      <defs>
+        <marker id="aha" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto"><path d="M0 0 L6.5 3 L0 6 z" fill="var(--accent)"/></marker>
+      </defs>
+      <style>
+        .ab rect{fill:var(--panel);stroke:var(--border)} .ab.k rect{stroke:var(--accent)}
+        .ab .h{fill:var(--text);font-family:var(--mono);font-size:12px} .ab .s{fill:var(--text-muted);font-family:var(--mono);font-size:9.5px}
+        .al{stroke:var(--accent);stroke-width:1.4;fill:none} .alx{stroke:var(--border-strong);stroke-width:1.2;fill:none;stroke-dasharray:4 4}
+        .band{fill:var(--text-faint);font-family:var(--mono);font-size:9px;letter-spacing:.12em}
+      </style>
+
+      <!-- front-ends -->
+      <text class="band" x="8" y="22">FRONT-ENDS · THIN ADAPTERS</text>
+      <g class="ab"><rect x="270" y="30" width="210" height="46" rx="8"/><text class="h" x="375" y="52" text-anchor="middle">CLI · emc-assistant</text><text class="s" x="375" y="67" text-anchor="middle">argparse over service/</text></g>
+      <g class="ab"><rect x="520" y="30" width="210" height="46" rx="8"/><text class="h" x="625" y="52" text-anchor="middle">Desktop app · pywebview</text><text class="s" x="625" y="67" text-anchor="middle">Api bridge → service/</text></g>
+      <path class="al" d="M375 76 L375 96" marker-end="url(#aha)"/>
+      <path class="al" d="M625 76 L625 96" marker-end="url(#aha)"/>
+
+      <!-- service core -->
+      <g class="ab k"><rect x="120" y="98" width="760" height="52" rx="8"/><text class="h" x="500" y="120" text-anchor="middle">service/ — application core</text><text class="s" x="500" y="136" text-anchor="middle">use-cases (project · context · parasitics · testbench · simulate · report · pipeline) · resolvers · CommandOptions</text></g>
+      <path class="al" d="M500 150 L500 172" marker-end="url(#aha)"/>
+
+      <!-- deterministic spine -->
+      <text class="band" x="8" y="190">DETERMINISTIC SPINE · AUDITABLE ARTIFACT PER STAGE</text>
+      <g class="ab"><rect x="40" y="198" width="146" height="52" rx="7"/><text class="h" x="113" y="220" text-anchor="middle">netlist</text><text class="s" x="113" y="235" text-anchor="middle">.cir parse · topology</text></g>
+      <g class="ab"><rect x="194" y="198" width="146" height="52" rx="7"/><text class="h" x="267" y="220" text-anchor="middle">parasitics</text><text class="s" x="267" y="235" text-anchor="middle">per-net R·L·C bands</text></g>
+      <g class="ab"><rect x="348" y="198" width="146" height="52" rx="7"/><text class="h" x="421" y="220" text-anchor="middle">testbench</text><text class="s" x="421" y="235" text-anchor="middle">LISN+cable+inject</text></g>
+      <g class="ab"><rect x="502" y="198" width="146" height="52" rx="7"/><text class="h" x="575" y="220" text-anchor="middle">ltspice</text><text class="s" x="575" y="235" text-anchor="middle">runner · .raw/.log</text></g>
+      <g class="ab"><rect x="656" y="198" width="146" height="52" rx="7"/><text class="h" x="729" y="220" text-anchor="middle">results</text><text class="s" x="729" y="235" text-anchor="middle">detectors · metrics · rank</text></g>
+      <g class="ab"><rect x="810" y="198" width="150" height="52" rx="7"/><text class="h" x="885" y="220" text-anchor="middle">reports</text><text class="s" x="885" y="235" text-anchor="middle">md · html · pdf</text></g>
+      <path class="al" d="M500 250 L500 272" marker-end="url(#aha)"/>
+
+      <!-- opt-in layers -->
+      <text class="band" x="8" y="290">OPT-IN LLM LAYER · ASSISTANT, NOT SOURCE OF TRUTH</text>
+      <g class="ab k"><rect x="40" y="298" width="290" height="52" rx="7"/><text class="h" x="185" y="320" text-anchor="middle">agents/</text><text class="s" x="185" y="335" text-anchor="middle">11 specialists + orchestrator + synthesiser</text></g>
+      <g class="ab k"><rect x="355" y="298" width="290" height="52" rx="7"/><text class="h" x="500" y="320" text-anchor="middle">knowledge/ — RAG</text><text class="s" x="500" y="335" text-anchor="middle">curated rules · numpy vector index</text></g>
+      <g class="ab k"><rect x="670" y="298" width="290" height="52" rx="7"/><text class="h" x="815" y="320" text-anchor="middle">llm/ — provider seam</text><text class="s" x="815" y="335" text-anchor="middle">budget cap · copyright redaction</text></g>
+
+      <!-- externals -->
+      <text class="band" x="8" y="392">EXTERNAL · LOCAL FIRST</text>
+      <g class="ab"><rect x="40" y="400" width="440" height="56" rx="8"/><text class="h" x="260" y="424" text-anchor="middle">LTspice — local subprocess</text><text class="s" x="260" y="440" text-anchor="middle">user-supplied · batch -b -Run · never bundled / hosted</text></g>
+      <g class="ab"><rect x="520" y="400" width="440" height="56" rx="8" stroke-dasharray="5 4"/><text class="h" x="740" y="424" text-anchor="middle">Cloud LLM — opt-in, key-gated</text><text class="s" x="740" y="440" text-anchor="middle">redacted structured egress · off by default · budget-capped</text></g>
+      <!-- external links -->
+      <path class="al" d="M575 250 L575 360 L260 360 L260 400" marker-end="url(#aha)"/>
+      <path class="alx" d="M815 350 L815 376 L740 376 L740 400" marker-end="url(#aha)"/>
+      <text class="s" x="296" y="356" fill="var(--text-muted)" font-family="var(--mono)" font-size="9.5">runs</text>
+      <text class="s" x="772" y="372" fill="var(--text-muted)" font-family="var(--mono)" font-size="9.5">redacted only</text>
+    </svg>
+  </div>
+
+  <div class="grid g3" style="margin-top:18px">
+    <div class="card"><h3><span class="ic">⌗</span> service/ is the product</h3>
+      <p>One typed application core — a plain function per use case returning a result dataclass. Both front-ends are thin adapters, so behaviour can't drift between the CLI and the app.</p></div>
+    <div class="card"><h3><span class="ic">▤</span> Auditable spine</h3>
+      <p>Every stage writes a JSON/SPICE artifact under <span class="mono">generated/</span> · <span class="mono">results/</span> · <span class="mono">reports/</span> — nothing is a black box, and the whole chain is reproducible from the inputs.</p></div>
+    <div class="card"><h3><span class="ic">⛨</span> Local-first egress control</h3>
+      <p>The deterministic core needs no network. Cloud LLM is opt-in and key-gated; every outbound payload is redacted (<span class="mono">rule_id</span>+summary, ≤200-char excerpt) and logged to <span class="mono">results/llm/*.jsonl</span>.</p></div>
+    <div class="card"><h3><span class="ic">◷</span> Offline schema validation</h3>
+      <p>A local <span class="mono">referencing.Registry</span> resolves every cross-<span class="mono">$ref</span> offline, so all artifacts are schema-validated without touching the network.</p></div>
+    <div class="card"><h3><span class="ic">⌁</span> Structured logging seam</h3>
+      <p>Components log under <span class="mono">emc_assistant.&lt;area&gt;</span> to a console handler, an optional per-run JSONL file, and a UI hook — replacing ad-hoc prints.</p></div>
+    <div class="card"><h3><span class="ic">▦</span> Where it's going (M11)</h3>
+      <p>A localhost service + thin client: the pipeline runs <b>out-of-process</b> so a UI crash can never lose a run, with pull-based logging and a content-aware freshness model. The <span class="mono">service/</span> layer stays the core.</p></div>
+  </div>
+</div></section>
+
+<!-- SCREENS -->
+<section id="screens"><div class="wrap">
+  <div class="sec-head"><span class="kicker">The desktop app</span><h2>Screens, on real case_003 data</h2></div>
+  <p class="sec-sub">The pywebview shell reads the very same artifacts shown above. Below: the full app — left rail with pipeline gating, topbar and the active screen — then each screen on its own. (Renderings reproduce the live screens with real case_003 values.)</p>
+
+  <!-- full app shell -->
+  <div class="appwin">
+    <div class="winbar"><span class="tl"><span></span><span></span><span></span></span> EMC Assistant — case_003_DCDC_eval — Results</div>
+    <div class="appgrid">
+      <aside class="arail">
+        <div class="abrand"><span class="mk">EMC</span><div><div class="t1">EMC Assistant</div><div class="t2">Pre-compliance · local</div></div></div>
+        <div class="asect"><span>Workspace</span></div>
+        <div class="anav"><span class="ico">▣</span>Projects</div>
+        <div class="asect"><span>Analysis</span><span style="color:var(--text-muted)">case_003</span></div>
+        <div class="anav"><span class="ico">⤓</span>Import &amp; context<span class="ck">✓</span></div>
+        <div class="anav"><span class="ico">◇</span>Parasitic selection<span class="ck">✓</span></div>
+        <div class="anav"><span class="ico">▦</span>Testbench<span class="ck">✓</span></div>
+        <div class="anav"><span class="ico">▶</span>Run<span class="ck">✓</span></div>
+        <div class="anav active"><span class="ico">∿</span>Results<span class="num">05</span></div>
+        <div class="anav"><span class="ico">▤</span>Findings &amp; recs<span class="ck">✓</span></div>
+        <div class="anav"><span class="ico">▥</span>Report<span class="ck">✓</span></div>
+        <div class="asect"><span>Coming soon</span><span style="color:var(--text-faint)">roadmap</span></div>
+        <div class="anav locked"><span class="ico">⚗</span>Live Lab Assistant<span class="soon">SOON</span></div>
+        <div class="anav locked"><span class="ico">✸</span>Engineer Training<span class="soon">SOON</span></div>
+        <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:10px">
+          <div class="anav"><span class="ico">⚙</span>Settings</div>
+          <div style="font-family:var(--mono);font-size:9.5px;color:var(--sev-low);padding:5px 9px">● local · cloud LLM OFF</div>
+        </div>
+      </aside>
+      <div class="amain">
+        <div class="atop">
+          <div class="acrumb">Project / <b>case_003_DCDC_eval</b> / Results</div>
+          <div class="ameta"><span>topology <b>DC/DC buck</b></span><span>Vin/Vout <b>12 / 3.3 V</b></span><span>pipeline <b>report</b></span></div>
+          <span class="apriv">🔒 cloud LLM OFF</span>
+          <span class="asave">⌘S · Save</span>
+        </div>
+        <div class="abody">
+          <div class="verdict">
+            <div style="flex:1;min-width:0"><b>Diagnostic</b> <span class="note">· results/diagnostic.json · LLM · conf 70%</span>
+              <p style="margin:6px 0 0;color:var(--text-dim);font-size:13px">Switch-node (hot-loop) dv/dt likely dominates conducted EMI; differential-mode amplitude far exceeds common-mode.</p></div>
+            <div style="display:flex;flex-direction:column;gap:6px"><span class="pill info">DM dominant</span><span class="pill">simulated only</span></div>
+          </div>
+          <div class="stats">
+            <div class="stat"><div class="l">Band peak</div><div class="v">47.1<span class="s"> dBµV</span></div></div>
+            <div class="stat"><div class="l">DM peak</div><div class="v">20.85<span class="s"> V</span></div></div>
+            <div class="stat"><div class="l">CM peak</div><div class="v">10.40<span class="s"> V</span></div></div>
+            <div class="stat"><div class="l">Corner span</div><div class="v">~1.0<span class="s"> dB</span></div></div>
+          </div>
+          <p class="note" style="margin-top:12px">↓ the detector spectrum, waveform analyzer and corner-variant ranking follow in the live screen</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g2">
+    <!-- Results -->
+    <div class="mock">
+      <div class="mock-top"><span class="tl"><span></span><span></span><span></span></span> 06 · Results — case_003_DCDC_eval</div>
+      <div class="mock-body">
+        <div class="verdict">
+          <div style="flex:1;min-width:0"><b>Diagnostic</b> <span class="note">· results/diagnostic.json · LLM</span>
+            <p style="margin:6px 0 0;color:var(--text-dim);font-size:13px">Switch-node dv/dt likely dominates conducted EMI…</p></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><span class="pill info">conf 70%</span><span class="pill info">DM dominant</span></div>
+        </div>
+        <div class="stats">
+          <div class="stat"><div class="l">Band peak</div><div class="v">47.1<span class="s"> dBµV</span></div></div>
+          <div class="stat"><div class="l">DM peak</div><div class="v">20.85<span class="s"> V</span></div></div>
+          <div class="stat"><div class="l">CM peak</div><div class="v">10.40<span class="s"> V</span></div></div>
+          <div class="stat"><div class="l">Corner span</div><div class="v">~1.0<span class="s"> dB</span></div></div>
+        </div>
+        <p class="note" style="margin-top:12px">Corner ranking: 11 variants · worst par-trace-R…max 48.10 dBµV · baseline 47.08</p>
+      </div>
+    </div>
+    <!-- Parasitics -->
+    <div class="mock">
+      <div class="mock-top"><span class="tl"><span></span><span></span><span></span></span> 03 · Parasitic selection</div>
+      <div class="mock-body">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--text-dim)">
+          <span class="pill">31 nets</span><span class="pill ok">14 included</span><span class="pill">17 skipped</span><span class="pill">0 overrides</span>
+        </div>
+        <table class="t">
+          <tr><th></th><th>Net</th><th>Role</th><th>Type</th><th class="num">R mΩ</th><th class="num">L nH</th><th class="num">C pF</th></tr>
+          <tr><td>■</td><td class="mono">N003</td><td>switch</td><td class="mono">series-RLC</td><td class="num">2.7</td><td class="num">4.62</td><td class="num">1.07</td></tr>
+          <tr><td>■</td><td class="mono">OUT</td><td>power</td><td class="mono">shunt-C</td><td class="num">7.6</td><td class="num">23.4</td><td class="num">4.02</td></tr>
+          <tr><td>■</td><td class="mono">N007</td><td>signal</td><td class="mono">series-RLC</td><td class="num">20.2</td><td class="num">19.3</td><td class="num">2.68</td></tr>
+          <tr style="opacity:.5"><td>▢</td><td class="mono">MP_01</td><td>signal</td><td class="mono">shunt-C</td><td class="num">20.2</td><td class="num">19.3</td><td class="num">2.68</td></tr>
+        </table>
+        <p class="note" style="margin-top:10px">Audit → 6 series · 7 shunt · 17 dropped (user) · 1 input-rail TRACE_RLC</p>
+      </div>
+    </div>
+    <!-- Testbench -->
+    <div class="mock">
+      <div class="mock-top"><span class="tl"><span></span><span></span><span></span></span> 04 · Testbench review — case_003_DCDC_eval</div>
+      <div class="mock-body">
+        <div class="verdict">
+          <p class="mono" style="flex:1;min-width:0;margin:0;font-size:12px;color:var(--text-dim)">V_RAIL → LISN+ → cable → [TRACE_RLC] → DUT (31 nets) → LISN-  ·  DM+CM probes</p>
+          <span class="pill ok">composed</span>
+        </div>
+        <div class="grid g3" style="gap:10px;margin-top:12px">
+          <div class="stat"><div class="l">Wiring audit</div>
+            <div class="s" style="color:var(--text-dim);line-height:1.8">Supply VIN ↦ LISN ✓<br>Return 0 ↦ LISN ✓<br>Cable · default<br>LISN · dual DM+CM<br>Input-rail · 1 TRACE_RLC</div></div>
+          <div class="stat"><div class="l">Parasitics audit</div>
+            <div class="s" style="color:var(--text-dim);line-height:1.8">Series RLC · 6 nets<br>Shunt-C · 7 nets<br>Dropped user · 17<br>Dropped AI · 0</div></div>
+          <div class="stat"><div class="l">Signal audit</div>
+            <div class="s" style="color:var(--text-dim);line-height:1.8">Vout · V(OUT)<br>Vin · V(IN)</div></div>
+        </div>
+        <p class="note" style="margin-top:10px">Actions: View&nbsp;testbench.cir · Continue&nbsp;to&nbsp;run&nbsp;→ (auto-starts the pipeline)</p>
+      </div>
+    </div>
+    <!-- Findings -->
+    <div class="mock">
+      <div class="mock-top"><span class="tl"><span></span><span></span><span></span></span> 07 · Findings &amp; recommendations</div>
+      <div class="mock-body">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+          <span class="pill warn">Open 37</span><span class="pill">Accepted 0</span><span class="pill">Rejected 0</span><span class="pill">All 37</span>
+        </div>
+        <div class="find"><div class="h"><span class="pill hi">HIGH</span><span class="area">filtering</span><span style="font-size:13px">Input LC may be undamped; DM emissions dominate.</span></div></div>
+        <div class="find" style="border-left-color:var(--sev-high)"><div class="h"><span class="pill hi">HIGH</span><span class="area">decoupling</span><span style="font-size:13px">Band peak suggests insufficient HF bypass near the IC.</span></div></div>
+        <p class="note" style="margin-top:8px">Accept / reject each → persisted to the report's decision log.</p>
+      </div>
+    </div>
+    <!-- Stale guard -->
+    <div class="mock">
+      <div class="mock-top"><span class="tl"><span></span><span></span><span></span></span> Honest-data guard</div>
+      <div class="mock-body">
+        <div class="disclaimer" style="border-color:oklch(0.78 0.16 75/0.4)">
+          <span>⚠</span><span>These results are out of date. An input changed since this run — re-run the pipeline to refresh.&nbsp; <span class="pill warn">Re-run pipeline →</span></span>
+        </div>
+        <p style="margin:12px 0 0;color:var(--text-dim);font-size:14px">Edit any upstream input and the whole downstream chain is marked <b>stale</b> on the rail; Results, Findings and Report dim their numbers and show this banner. Stale data is never presented as current.</p>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- ROADMAP / VERSIONS -->
+<section id="roadmap"><div class="wrap">
+  <div class="sec-head"><span class="kicker">Versions &amp; roadmap</span><h2>Where it is, where it's going</h2></div>
+  <div class="grid g3" style="margin-bottom:26px">
+    <div class="card"><h3>Cloud model</h3><p>OpenAI <span class="mono">gpt-5-mini</span> — opt-in, key-gated, budget-capped. Deterministic fallback when off.</p></div>
+    <div class="card"><h3>Embeddings</h3><p>Local <span class="mono">sentence-transformers</span> (POC) behind a pluggable interface; pure-numpy vector index.</p></div>
+    <div class="card"><h3>Simulator</h3><p>Your local <span class="mono">LTspice</span> (e.g. 26.0.2) — discovered, never bundled, never hosted.</p></div>
+  </div>
+  <div class="road">
+    <div class="ms"><div class="when">M0 – M2.x</div><div class="what"><b>Deterministic core + LLM layer <span class="badge b-ship">done</span></b><p>Schematic → testbench → variants → LTspice → metrics → ranking → report; per-net parasitics, 11 agents, RAG, redaction, CISPR detector suite, EN 55022 limits.</p></div></div>
+    <div class="ms"><div class="when">M3</div><div class="what"><b>Desktop UI <span class="badge b-ship">done</span></b><p>pywebview shell over the service core — Projects → Report wired to real artifacts, with the stale-data guard.</p></div></div>
+    <div class="ms"><div class="when">M10</div><div class="what"><b>CM-coupling model <span class="badge b-road">planned</span></b><p>CSTRAY → earth, so the common-mode metrics and plot carry a real deterministic signal.</p></div></div>
+    <div class="ms"><div class="when">M11</div><div class="what"><b>UI rebuild <span class="badge b-road">planned</span></b><p>From-the-studs remake: localhost service + thin client, out-of-process pipeline, content-aware freshness, large-.raw streaming, pre-run cost/privacy gate.</p></div></div>
+    <div class="ms"><div class="when">M12</div><div class="what"><b>Live Lab Assistant <span class="badge b-road">planned</span></b><p>Overlay a live EMI-receiver spectrum on the simulated prediction; real-time attribution to a specific parasitic.</p></div></div>
+    <div class="ms"><div class="when">M13</div><div class="what"><b>Engineer Training <span class="badge b-road">planned</span></b><p>Your estimated→corrected overrides become opt-in, federated, redacted training signal — the tool improves with use.</p></div></div>
+  </div>
+
+  <div class="sec-head" style="margin-top:34px"><span class="kicker">To add &amp; improve</span><h2 style="font-size:22px">The honest backlog</h2></div>
+  <p class="sec-sub">What's known to be missing or rough, kept in the open. Everything below is planned or a tracked caveat — not yet shipped.</p>
+  <div class="grid g3">
+    <div class="card"><h3><span class="ic">⎍</span> Selectable detector + narrow-harmonic accuracy <span class="badge b-road">planned</span></h3>
+      <p>The canonical receiver-like sweep (Mode 3, 128 pts) under-reads narrow harmonics that fall between swept points. Make detector mode / start-skip / point density user-selectable, and root-cause the skip anomaly.</p></div>
+    <div class="card"><h3><span class="ic">⌬</span> Schematic-understanding agent <span class="badge b-road">M4</span></h3>
+      <p>The tool netlists but doesn't yet <i>understand</i> the schematic — net roles are heuristic. Label power stage, high/low-side switches, SW node, hot loop and rails as user-confirmable, sourced hypotheses.</p></div>
+    <div class="card"><h3><span class="ic">≈</span> EMI-filter design / optimization agent <span class="badge b-road">M4</span></h3>
+      <p>Diagnose DM/CM noise from the detector result, size a π-filter / CM choke (banded, with Y-cap leakage + damping guards), and close the loop: inject → re-simulate → adjust to meet the limit.</p></div>
+    <div class="card"><h3><span class="ic">⚙</span> Device-aware sim-setup agent <span class="badge b-road">M4</span></h3>
+      <p>Infer the switching-edge rate from the FET part / topology + KB, so fast-edge devices get a device-aware timestep verdict without the user supplying a rise time.</p></div>
+    <div class="card"><h3><span class="ic">⊕</span> Variant-review / proposal agent <span class="badge b-road">M4</span></h3>
+      <p>Review whether the min/typ/max corner sweep covers the uncertainty and propose <i>additional</i> sensitivity / what-if variants as an accept/skip list — additive only, never replacing the deterministic baseline.</p></div>
+    <div class="card"><h3><span class="ic">⌁</span> Conversational parasitics-strategy chat <span class="badge b-road">M5</span></h3>
+      <p>Direct strategy in natural language ("add a series L to every net with a 10 pF shunt"); the LLM proposes RAG-grounded per-net edits as a reviewable diff — never a silent mutation.</p></div>
+    <div class="card"><h3><span class="ic">⚿</span> Common-mode coupling model <span class="badge b-road">M10</span></h3>
+      <p>Opt-in, dual-LISN-only stray capacitance to earth from high-dv/dt nets, so the CM metrics and CM detector plot carry real deterministic signal (today they exist but are inert).</p></div>
+    <div class="card"><h3><span class="ic">⛨</span> Security &amp; privacy hardening review <span class="badge b-road">M9</span></h3>
+      <p>A cross-cutting assurance pass before wider distribution: redaction-path audit + outbound-payload guard, key-never-logged, bridge path-traversal review, parser fuzzing, CSP, and a <span class="mono">pip-audit</span> scan.</p></div>
+    <div class="card"><h3><span class="ic">▦</span> UI rebuild — out-of-process <span class="badge b-road">M11</span></h3>
+      <p>Localhost service + thin client: crash-isolated runs, pull-based log streaming, content-aware freshness, large-<span class="mono">.raw</span> streaming, a faithful per-net testbench render, and a pre-run cost/privacy gate.</p></div>
+    <div class="card"><h3><span class="ic">∿</span> Transient-event detection &amp; auto-window <span class="badge b-road">planned</span></h3>
+      <p>Detect max <span class="mono">|di/dt|</span> / turn-on inrush and auto-size the <span class="mono">.tran</span> window so a slow turn-on event isn't truncated — distinct from the steady-state conducted-EMI run.</p></div>
+    <div class="card"><h3><span class="ic">⤓</span> <span class="mono">.raw</span> fastaccess + multi-LISN CM <span class="badge b-road">planned</span></h3>
+      <p>Support LTspice fastaccess-format <span class="mono">.raw</span> and a real two-LISN <span class="mono">V(CM)</span> (today single-LISN <span class="mono">V(CM)</span> is a placeholder).</p></div>
+    <div class="card"><h3><span class="ic">▣</span> Pro &amp; layout tracks <span class="badge b-road">M6 / M7</span></h3>
+      <p>Project history beyond one project, richer stack-up / cable profiles, daily/monthly budget caps (M6); layout import, parasitic extraction and radiated-risk estimation (M7).</p></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <div class="disclaimer">
+    <span style="font-size:18px">⚠</span>
+    <div><b>Pre-compliance only.</b> Every output is an <i>engineering hypothesis requiring laboratory verification</i> — never a guarantee that a design will pass formal EMC. Simulation does not replace an accredited CISPR-16 measurement. The tool speaks in “reduces risk”, “may improve”, “requires verification”. <b>Independent open-source project</b> — LTspice is user-supplied and runs locally; results are engineering diagnostics, not certification.</div>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <b>Open EMC</b> · EMC-Assist — local conducted-EMI pre-compliance for power converters ·
+  <a href="https://openemc.dev" style="color:var(--text-dim)">openemc.dev</a> ·
+  <a href="https://github.com/RobertMalczyk/emc-assist" style="color:var(--text-dim)">github.com/RobertMalczyk/emc-assist</a> · Apache-2.0<br>
+  <span class="note">All figures from the bundled <span class="mono">examples/case_003_DCDC_eval</span> (Analog Devices LTC7800) and match the shipped artifacts at publish time — re-running the pipeline may shift them. See <span class="mono">docs/user_guide/</span> for the docs. Independent open-source project — not affiliated with or endorsed by Analog Devices; LTspice is user-supplied and runs locally, never bundled or hosted.</span>
+</div></footer>
+
+</body>
+</html>

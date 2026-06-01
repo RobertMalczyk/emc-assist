@@ -1,0 +1,121 @@
+================================================================================
+EMC/LTspice Assistant — PDF download backlog
+================================================================================
+
+14 application notes catalogued in the seed manifests that the automated
+fetcher (scripts/fetch_seed_pdfs.py) could not pull:
+
+  - Analog Devices  -> anti-bot: server drops programmatic requests
+  - Infineon        -> TLS chain: corporate proxy MITMs HTTPS (try --insecure)
+  - STMicro         -> timeout / rate-limit
+
+All 14 are freely published vendor application notes. Download each in a
+browser and save it into:
+
+    knowledge/raw_sources/
+
+using EXACTLY the filename in the "SAVE AS" column below — the indexer
+parses the SRC-ID and slug from that name. Then rebuild the index:
+
+    python -m emc_assistant.cli knowledge index
+
+Before doing it manually, it is worth one more automated attempt with the
+rewritten browser-like fetcher:
+
+    python scripts/fetch_seed_pdfs.py --insecure --retries 4
+
+The --insecure flag often clears the Infineon TLS-chain failures.
+
+Last updated: 2026-05-16   |   Index at this point: 4489 chunks (91 files)
+
+================================================================================
+ANALOG DEVICES  (6 files — open the URL in a browser tab, then File > Save As)
+================================================================================
+
+[1] SRC-010   MT-101: Decoupling Techniques
+    SAVE AS:  SRC-010__mt_101_decoupling_techniques.pdf
+    URL:      https://www.analog.com/media/en/training-seminars/tutorials/MT-101.pdf
+
+[2] S030      AN-202: An IC Amplifier User's Guide to Decoupling, Grounding,
+              and Making Things Go Right
+    SAVE AS:  S030__an_202_an_ic_amplifier_user_s_guide_to_decoupling_grounding_.pdf
+    URL:      https://www.analog.com/media/en/technical-documentation/application-notes/AN-202.pdf
+
+[3] SRC-011   Basic Linear Design, Chapter 12: Printed Circuit Board Design Issues
+    SAVE AS:  SRC-011__basic_linear_design_chapter_12_printed_circuit_board_design_.pdf
+    URL:      https://www.analog.com/media/en/training-seminars/design-handbooks/Basic-Linear-Design/Chapter12.pdf
+
+[4] SRC-012   Practical Power Solutions, Section 4: Hardware Design Techniques
+    SAVE AS:  SRC-012__practical_power_solutions_section_4_hardware_design_techniqu.pdf
+    URL:      https://www.analog.com/media/en/training-seminars/design-handbooks/Practical-Power-Solutions/Section4.pdf
+
+[5] SRC-016   Public GMSL2 Hardware Design and Validation Guide
+    SAVE AS:  SRC-016__public_gmsl2_hardware_design_and_validation_guide.pdf
+    URL:      https://www.analog.com/media/en/technical-documentation/user-guides/public-gmsl2-hardware-design-and-validation-guide.pdf
+
+[6] SRC-017   Public GMSL3 Hardware Design and Validation Guide
+    SAVE AS:  SRC-017__public_gmsl3_hardware_design_and_validation_guide.pdf
+    URL:      https://www.analog.com/media/en/technical-documentation/user-guides/public-gmsl3-hardware-design-and-validation-guide.pdf
+
+================================================================================
+WURTH ELEKTRONIK  (1 file — often works on a plain retry)
+================================================================================
+
+[7] SRC-026   EMC Design Tips 2025
+    SAVE AS:  SRC-026__emc_design_tips_2025.pdf
+    URL:      https://www.we-online.com/files/pdf1/emc-design-tips-2025_en.pdf
+
+================================================================================
+INFINEON  (6 files — TLS chain failure; try `--insecure` first)
+================================================================================
+
+[8] SRC-048   EMC and System-ESD Design Guidelines for Board Layout
+    SAVE AS:  SRC-048__emc_and_system_esd_design_guidelines_for_board_layout.pdf
+    URL:      https://www.infineon.com/assets/row/public/documents/30/42/infineon-ap2402635-general-pcb-applicationnotes-en.pdf
+
+[9] SRC-049   Basic Design Consideration and Layout Recommendations for EMC Robustness
+    SAVE AS:  SRC-049__basic_design_consideration_and_layout_recommendations_for_em.pdf
+    URL:      https://www.infineon.com/assets/row/public/documents/24/42/infineon-basic-design-consideration-and-layout-recommendations-for-emc-robustness-applicationnotes-en.pdf
+
+[10] SRC-050  AC-DC Universal Input 45 W Power Supply Using CoolSET SiP ICE184ZCM
+    SAVE AS:  SRC-050__ac_dc_universal_input_45_w_power_supply_using_coolset_sip_ic.pdf
+    URL:      https://www.infineon.com/assets/row/public/documents/24/42/infineon-ac-dc-universal-input-45w-power-supply-using-coolset-sip-ice184zcm-applicationnotes-en.pdf
+
+[11] SRC-051  Optimizing CoolMOS CE Based Power Supplies to Meet EMI Requirements
+    SAVE AS:  SRC-051__optimizing_coolmos_ce_based_power_supplies_to_meet_emi_requi.pdf
+    URL:      https://www.infineon.com/assets/row/public/documents/24/42/infineon-applicationnote-optimizing-coolmosce-based-power-supplies-for-emi-applicationnotes-en.pdf
+
+[12] SRC-052  EZ-USB FX2G3 Hardware Design Guidelines and Schematic Checklist
+    SAVE AS:  SRC-052__ez_usb_fx2g3_hardware_design_guidelines_and_schematic_checkl.pdf
+    URL:      https://www.infineon.com/assets/row/public/documents/24/42/infineon-ez-usb-tm-fx2g3-hardware-design-guidelines-and-schematic-checklist-applicationnotes-en.pdf
+
+[13] SRC-053  EZ-PD PMG1 MCU Hardware Design Guidelines and Checklist
+    SAVE AS:  SRC-053__ez_pd_pmg1_mcu_hardware_design_guidelines_and_checklist.pdf
+    URL:      https://www.infineon.com/assets/row/public/documents/24/42/infineon-an232565-ez-pd-pmg1-mcu-hardware-design-guidelines-and-checklist-applicationnotes-en.pdf
+
+================================================================================
+STMICROELECTRONICS  (1 file)
+================================================================================
+
+[14] SRC-056  AN5240 Layout Recommendations for ST25R Devices
+    SAVE AS:  SRC-056__an5240_layout_recommendations_for_st25r_devices.pdf
+    URL:      https://www.st.com/resource/en/application_note/an5240-layout-recommendations-for-the-design-of-boards-with-the-st25r391616b-1717b-18-19b-and-2020b-devices-stmicroelectronics.pdf
+
+================================================================================
+DEAD LINK — do not bother
+================================================================================
+
+SRC-058  Murata LTspice library page -> HTTP 404, the source moved.
+         If you want Murata SPICE models, find their current SimSurfing /
+         design-tool library page and add it to the manifest as a new URL.
+
+================================================================================
+AFTER DOWNLOADING
+================================================================================
+
+1. Drop all .pdf files into  knowledge/raw_sources/
+2. Run:  python -m emc_assistant.cli knowledge index
+3. Refresh knowledge/INDEX_STATUS.md with the new chunk count.
+
+The .pdf files themselves are gitignored under raw_sources/; only this
+list, INDEX_STATUS.md, and the seed manifests are tracked.

@@ -1,0 +1,35 @@
+{
+  "project_type": "DC/DC buck converter",
+  "problem_hypothesis": "conducted EMI near switching harmonics",
+  "input_voltage_v": 24,
+  "load_current_a": 2,
+  "switching_frequency_hz": 400000,
+  "cable_length_m": 1,
+  "pcb": {
+    "layers": 4,
+    "copper_oz": 1,
+    "dielectric_height_to_plane_mm": 0.2,
+    "trace_length_mm": 20,
+    "trace_width_mm": 1,
+    "prepreg_mm": 0.1
+  },
+  "testbench_wiring": {
+    "external_supply_v": 24,
+    "dut_supply_net": "in",
+    "dut_return_net": "0",
+    "user_source_to_strip": "Vin",
+    "lisn_mode": "dual"
+  },
+  "notes": "Synthetic starter case. Not a certified EMC scenario.",
+  "signals": [
+    {
+      "name": "Vout",
+      "kind": "voltage",
+      "expr": "V(out)",
+      "source": "user",
+      "unit": "V",
+      "confidence": 1.0,
+      "rationale": "net name matches voltage-rail heuristic; alias from `out`"
+    }
+  ]
+}

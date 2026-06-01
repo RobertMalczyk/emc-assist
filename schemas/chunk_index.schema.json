@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/schemas/chunk_index.schema.json",
+  "title": "Chunk index entry",
+  "description": "One JSON object per line in `knowledge/processed/chunks.jsonl`. Embeddings live alongside in `embeddings.npy` (same row order).",
+  "type": "object",
+  "required": [
+    "chunk_id",
+    "tier",
+    "source_id",
+    "text",
+    "source_path",
+    "source_type"
+  ],
+  "properties": {
+    "chunk_id": {
+      "type": "string",
+      "description": "Stable identifier `<tier>:<source_id>:<chunk_seq>`. Allows reproducible re-indexing."
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["seed", "raw_sources", "user_private_sources", "licensed_sources"]
+    },
+    "source_id": {
+      "type": "string",
+      "description": "Source manifest ID (e.g. `S001`, `SRC-022`). Maps the chunk back to its license metadata."
+    },
+    "rule_id": {
+      "type": "string",
+      "description": "When the chunk is a jsonl rule, the originating `Rule_ID` (e.g. `R001`, `R-005`)."
+    },
+    "source_path": {
+      "type": "string",
+      "description": "Absolute or repo-relative path to the source file."
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["md", "txt", "html", "jsonl", "pdf"]
+    },
+    "text": {
+      "type": "string",
+      "description": "The chunk body, after normalisation (HTML tags stripped, etc.). Used for retrieval scoring."
+    },
+    "title": {
+      "type": "string",
+      "description": "Best-effort heading or title (from `Title:` in source manifest, from `#` in markdown, etc.)."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "allowed_use": {
+      "type": "string",
+      "description": "Copied from the source manifest. Drives `redact_for_llm` policy."
+    },
+    "summary": {
+      "type": "string",
+      "description": "Our own short summary for LLM exposure (the field that gets sent through redaction)."
+    },
+    "checksum": {
+      "type": "string",
+      "description": "SHA-256 of the source file at index time. Lets `knowledge index` skip unchanged files on rebuild."
+    }
+  }
+}

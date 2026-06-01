@@ -1,0 +1,21 @@
+{
+  "name": "emc-assistant-ui",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "React + Vite UI for the EMC/LTspice Assistant — built once into src/emc_assistant/ui/web/, loaded by the pywebview shell over the service layer.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0",
+    "@vitejs/plugin-react": "^4.3.0"
+  }
+}
